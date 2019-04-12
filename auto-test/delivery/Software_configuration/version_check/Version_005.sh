@@ -34,8 +34,8 @@ TMPCFG=${TMPDIR}/${test_name}.tmp_cfg
 test_result="pass"
 
 ibmc_ip_list=(172.16.11.5 172.16.11.6 172.16.11.11 172.16.11.10 192.168.1.154)
-ibmc_user=Administrator
-ibmc_pwd=Admin@9000
+ibmc_user=root
+ibmc_pwd=Huawei12#$
 
 
 #预置条件
