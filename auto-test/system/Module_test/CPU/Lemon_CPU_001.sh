@@ -72,7 +72,7 @@ function init_env()
 	#需要安装工具，使用公共函数install_deps，用法：install_deps "${pkgs}"
 	#需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
 
-	fn_install_pkg "wget gcc make" 
+	fn_install_pkg "wget gcc make" 2
 	if [ $? -eq 0 ];then
 		fn_writeResultFile "${RESULT_FILE}" "install_deps"  "pass"
 	else
