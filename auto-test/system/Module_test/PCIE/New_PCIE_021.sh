@@ -57,9 +57,9 @@ function init_env()
 	for pkg in pciutils fio
 	do
 		if [ "$pkg" = "pciutils" ];then
-			which lspci || fn_install_pkg $pkg
+			which lspci || fn_install_pkg $pkg 1
 		else
-			which $pkg || fn_install_pkg $pkg
+			which $pkg || fn_install_pkg $pkg 1
 		fi
 		if [ $? != 0 ];then
                 	PRINT_LOG "FATAL" "download $pkg"
