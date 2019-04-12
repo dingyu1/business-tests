@@ -508,7 +508,7 @@ function init_env()
 	  #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
 	
 
-	fn_install_pkg "bc  wget expect python2.7 python-minimal numactl sysstat"
+	fn_install_pkg "bc  wget expect python2.7 python-minimal numactl sysstat" 2
 	if [ $? -eq 0 ];then
 		fn_writeResultFile "${RESULT_FILE}" "install_deps" "pass"
 	else
