@@ -77,7 +77,7 @@ function init_env()
 	# install_deps unzip make gcc automake
 	for pkg in unzip make gcc automake wget
         do
-                which $pkg || fn_install_pkg $pkg
+                which $pkg || fn_install_pkg $pkg 1
                 if [ $? != 0 ];then
                         PRINT_LOG "FATAL" "download $pkg"
                         exit 1
