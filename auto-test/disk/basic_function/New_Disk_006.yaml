@@ -1,0 +1,35 @@
+metadata:
+    name: New_Disk_006
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Fault tolerance test on the disk interface"
+    maintainer:
+        - fan_xingguo@hoperun.com
+    scope:
+        - sas_sata_disk
+    os:
+        - centos
+        - suse
+        - redhat
+        - debian
+        - ubuntu
+    devices:
+        - d05
+        - d06
+    level: 1
+    totalcase:
+        centos: 1
+        suse: 1
+        redhat: 1
+        debian: 1
+        ubuntu: 1
+run:
+    steps:
+        - "cd  auto-test/disk/basic_function; bash New_Disk_006.yaml; cd -"
+parse:
+    pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+    fixupdict:
+        FAIL: fail
+        PASS: pass
+
+
+
