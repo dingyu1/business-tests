@@ -20,7 +20,7 @@
 . ../../../../../utils/error_code.inc
 . ../../../../../utils/sys_info.sh
 . ../../../../../utils/sh-test-lib
-
+set -x
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
 #创建log目录
@@ -43,75 +43,100 @@ function init_env(){
      echo "You must be root user " >$2
      exit 1
    fi
-   yum install vconfig -y
+    yum install vconfig -y
 }
-##********************************************#
-# Name          : get _network_name           #
-# Description   : 获取网卡名字                #
-                                              #
-#*********************************************#
-function get_network_name()
+
+
+function test_case()
 {
+  check_result ${RESULT_FILE}
+  network_name=`ip link|grep "state UP"|awk '{print $2}'|sed 's/://g'|egrep -v "vir|br|vnet|docker"`
+  echo $network_name
+ for i in $network_name
+ do
+     vconfig add $i 100
+     if [ $? -eq 0 ];then
+        PRINT_LOG "INFO" "add vlan first"
+        fn_writeResultFile "${RESULT_FILE}" "add vlan first" "pass"
+     else
+       PRINT_LOG "FAIL" "add valan first"
+       fn_writeResultFile "${RESULT_FILE}" "add vlan first" "fail"
+     fi
 
-  ip link|grep "BROADCAST" > 1.log
-  cat 1.log
-  i=0
-  while read line
-  do
-    str=`echo $line|awk '{print $2}'|sed 's/://g'|grep "e"`
-    #echo $str
-    echo $i
-    array[$i]=${str}
-    echo ${array[$i]}
-    let i+=1
-  done <  1.log
-  echo ${array[@]}
-  print_info $? get_network
+     ip address add dev $i.100 192.168.1.26/24 dev $i.100
+     if [ $? -eq 0 ];then
+         PRINT_LOG "INFO" "add ip on vlan first"
+         fn_writeResultFile "${RESULT_FILE}" "add ip on vlan first" "pass"
+     else
+         PRINT_LOG "FAIL" "add ip on vlan first"
+         fn_writeResultFile "${RESULT_FILE}" "add ip on vlan first" "fail"
+     fi
+     vconfig add $i 200
+     if [ $? -eq 0 ];then
+        PRINT_LOG "INFO" "add vlan two"
+        fn_writeResultFile "${RESULT_FILE}" "add vlan two" "pass"
+     else
+       PRINT_LOG "FAIL" "add vlan two"
+       fn_writeResultFile "${RESULT_FILE}" "add vlan two" "fail"
+     fi
+     ip address add dev $i.200 192.168.1.27/24 dev $i.100
+     if [ $? -eq 0 ];then
 
+        PRINT_LOG "INFO" "add ip on vlan two"
+
+        fn_writeResultFile "${RESULT_FILE}" "add ip vlan two" "pass"
+     else
+
+       PRINT_LOG "FAIL" "add ip  vlan two"
+
+       fn_writeResultFile "${RESULT_FILE}" "add ip  vlan two" "fail"
+     fi
+     vconfig rem  $i.100
+     if [ $? -eq 0 ];then
+        PRINT_LOG "INFO" "rm vlan first"
+        fn_writeResultFile "${RESULT_FILE}" "rm vlan first" "pass"
+     else
+       PRINT_LOG "FAIL" "rm vlan first"
+      fn_writeResultFile "${RESULT_FILE}" "rm vlan first" "fail"
+    fi
+
+     vconfig rem $i.200
+
+    if [ $? -eq 0 ];then
+       PRINT_LOG "INFO" "rm two vlan"
+       fn_writeResultFile "${RESULT_FILE}" "rm two vlan" "pass"
+    else
+       PRINT_LOG "FAIL" "rm two vlan"
+       fn_writeResultFile "${RESULT_FILE}" "rm two vlan" "fail"
+    fi
+ done
+      check_result ${RESULT_FILE}
 }
 
 
-##*********************************************#
-# Name        : config_network_Vlan            #
-# Description : 给所有网口配置VLAN             #
-# Parameter   ： 无                            #
-#**********************************************#
-function config_network_vlan()
+
+
+function clean_env()
 {
-       for var in ${array[@]}
-
-      do
-         echo $var
-
-         vconfig add $var 100
-         ip address add dev $var.100 192.168.1.26/24 dev $var.100
-         vconfig add $var 200
-         ip address add dev $var.200 192.168.1.27/24 dev $var.100
-
-      done
-
-      print_info $? config_network
+   FUNC_CLEAN_TMP_FILE
 }
 
-#**********************************************#
-# Name        : delete_network_vlan            #
-# Description : 删除配置的VLAN                 #
-# Parameter   ：   无                            #
-#**********************************************#
-function delete_network_vlan()
+
+
+function main()
 {
+    init_env|| test_result="fail"
+    if [ ${test_result} = "pass" ]
+    then
+        test_case || test_result="fail"
+    fi
+    clean_env || test_result="fail"
+    [ "${test_result}" = "pass" ] || return 1
 
-       for var in ${array[@]}
-
-      do
-         vconfig rem  $var.100
-         vconfig rem $var.200
-
-      done
-
-      print_info $? delete_vconfig
 }
-init_env
-get_network_name
-config_network_vlan
-delete_network_vlan
+
+
+main
+ret=$?
+lava-test-case "$test_name" --result ${test_result}
+exit ${ret}
