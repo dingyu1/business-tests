@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：New_NIC_ADVANCED_FlowControl_015                                                     
+# *用例名称：New_NIC_ADVANCED_FlowControl_016                                                   
 # *用例功能：网卡PAUSE Symmetric Receive-only状态检查                          
 # *作者：lwx588815                                                          
 # *完成时间：2019-4-10                                                               
@@ -61,10 +61,7 @@ function init_env()
             echo "$i" | tee -a network.txt
         fi
         done
-
-
 }       
-
 
 #测试执行
 function test_case()
@@ -84,11 +81,11 @@ function test_case()
        ethtool $j 2>&1|tee run.txt
        PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $6}'`
        if [ "$PAUSE"x = "Receive-only"x ];then
-           PRINT_LOG "INFO" "$i have Receive-only"
-           fn_writeResultFile "${RESULT_FILE}" "$i have Receive-only" "pass"
+           PRINT_LOG "INFO" "$j have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j have Receive-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Receive-only"
-           fn_writeResultFile "${RESULT_FILE}" "$i not have Receive-only" "fail"
+           PRINT_LOG "FATAL" "$j not have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j not have Receive-only" "fail"
        fi
        ethtool -A $j tx on
     done
@@ -104,7 +101,7 @@ function clean_env()
 {
 	#清除临时文件
 	FUNC_CLEAN_TMP_FILE
-        rm -rf network.txt
+        rm -rf network.txt run.txt
 
 }
 

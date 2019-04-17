@@ -80,11 +80,11 @@ function test_case()
        ethtool $j 2>&1 |tee run.txt
        PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $5}'`
        if [ "$PAUSE"x = "Transmit-only"x ];then
-           PRINT_LOG "INFO" "$i have Transmit-only"
-           fn_writeResultFile "${RESULT_FILE}" "$i Transmit-only" "pass"
+           PRINT_LOG "INFO" "$j have Transmit-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j Transmit-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Transmit-only"
-           fn_writeResultFile "${RESULT_FILE}" "$i not  Transmit-only" "fail"
+           PRINT_LOG "FATAL" "$j not have Transmit-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j not  Transmit-only" "fail"
        fi
        ethtool -A $j rx on
     done
@@ -100,7 +100,7 @@ function clean_env()
 {
 	#清除临时文件
 	FUNC_CLEAN_TMP_FILE
-        rm -rf network.txt
+        rm -rf network.txt run.txt
 
 }
 
