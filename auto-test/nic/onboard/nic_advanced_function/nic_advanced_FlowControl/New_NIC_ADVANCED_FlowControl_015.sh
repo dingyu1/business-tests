@@ -49,9 +49,8 @@ function init_env()
               PRINT_LOG "WARN" " You must be root user "
               return 1
         fi
-
         #install
-       # fn_install_pkg "ethtool" 2
+        fn_install_pkg "ethtool" 2
 
         network=`ip link | grep "state UP" | awk '{ print $2 }' | sed 's/://g'|egrep -v "vir|br|docker|vnet"`
         for i in $network
@@ -61,10 +60,7 @@ function init_env()
             echo "$i" | tee -a network.txt
         fi
         done
-
-
 }       
-
 
 #测试执行
 function test_case()
@@ -81,13 +77,14 @@ function test_case()
  
        ethtool -A $j rx off 
        sleep 5
-       PAUSE=`ethtool $j|grep "Advertised pause frame use:"|awk '{print $5}'`
+       ethtool $j 2>&1 |tee run.txt
+       PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $5}'`
        if [ "$PAUSE"x = "Transmit-only"x ];then
-           PRINT_LOG "INFO" "$i have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i have Symmetric" "pass"
+           PRINT_LOG "INFO" "$j have Transmit-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j Transmit-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i not have Symmetric" "fail"
+           PRINT_LOG "FATAL" "$j not have Transmit-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j not  Transmit-only" "fail"
        fi
        ethtool -A $j rx on
     done
@@ -103,10 +100,9 @@ function clean_env()
 {
 	#清除临时文件
 	FUNC_CLEAN_TMP_FILE
-        rm -rf network.txt
+        rm -rf network.txt run.txt
 
 }
-
 
 function main()
 {

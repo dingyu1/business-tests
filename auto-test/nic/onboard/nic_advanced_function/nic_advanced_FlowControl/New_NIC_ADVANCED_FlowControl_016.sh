@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：New_NIC_ADVANCED_FlowControl_015                                                     
+# *用例名称：New_NIC_ADVANCED_FlowControl_016                                                   
 # *用例功能：网卡PAUSE Symmetric Receive-only状态检查                          
 # *作者：lwx588815                                                          
 # *完成时间：2019-4-10                                                               
@@ -51,7 +51,7 @@ function init_env()
         fi
 
         #install
-       # fn_install_pkg "ethtool" 2
+        fn_install_pkg "ethtool" 2
 
         network=`ip link | grep "state UP" | awk '{ print $2 }' | sed 's/://g'|egrep -v "vir|br|docker|vnet"`
         for i in $network
@@ -61,10 +61,7 @@ function init_env()
             echo "$i" | tee -a network.txt
         fi
         done
-
-
 }       
-
 
 #测试执行
 function test_case()
@@ -81,13 +78,14 @@ function test_case()
  
        ethtool -A $j tx off 
        sleep 5
-       PAUSE=`ethtool $j|grep "Advertised pause frame use:"|awk '{print $6}'`
+       ethtool $j 2>&1|tee run.txt
+       PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $6}'`
        if [ "$PAUSE"x = "Receive-only"x ];then
-           PRINT_LOG "INFO" "$i have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i have Symmetric" "pass"
+           PRINT_LOG "INFO" "$j have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j have Receive-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i not have Symmetric" "fail"
+           PRINT_LOG "FATAL" "$j not have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$j not have Receive-only" "fail"
        fi
        ethtool -A $j tx on
     done
@@ -103,7 +101,7 @@ function clean_env()
 {
 	#清除临时文件
 	FUNC_CLEAN_TMP_FILE
-        rm -rf network.txt
+        rm -rf network.txt run.txt
 
 }
 
