@@ -11,7 +11,7 @@ metadata:
         - suse
         - redhat
     scope:
-        - nic
+        - liubeijie
     devices:
         - d06
         - d05
