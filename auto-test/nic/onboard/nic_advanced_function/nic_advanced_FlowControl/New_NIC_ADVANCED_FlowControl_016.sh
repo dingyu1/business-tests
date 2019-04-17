@@ -81,8 +81,8 @@ function test_case()
  
        ethtool -A $j tx off 
        sleep 5
-       PAUSE=`ethtool $j|grep "Advertised pause frame use:"|awk '{print $6}'`
-       echo "$PAUSE"
+       ethtool $j 2>&1|tee run.txt
+       PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $6}'`
        if [ "$PAUSE"x = "Receive-only"x ];then
            PRINT_LOG "INFO" "$i have Receive-only"
            fn_writeResultFile "${RESULT_FILE}" "$i have Receive-only" "pass"

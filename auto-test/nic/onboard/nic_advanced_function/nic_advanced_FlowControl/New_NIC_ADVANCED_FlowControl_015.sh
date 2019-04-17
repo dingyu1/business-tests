@@ -49,7 +49,6 @@ function init_env()
               PRINT_LOG "WARN" " You must be root user "
               return 1
         fi
-
         #install
         fn_install_pkg "ethtool" 2
 
@@ -61,10 +60,7 @@ function init_env()
             echo "$i" | tee -a network.txt
         fi
         done
-
-
 }       
-
 
 #测试执行
 function test_case()
@@ -81,13 +77,13 @@ function test_case()
  
        ethtool -A $j rx off 
        sleep 5
-       PAUSE=`ethtool $j|grep "Advertised pause frame use:"|awk '{print $5}'`
-       echo "$PAUSE            888888888888"
+       ethtool $j 2>&1 |tee run.txt
+       PAUSE=`cat run.txt|grep "Advertised pause frame use:"|awk '{print $5}'`
        if [ "$PAUSE"x = "Transmit-only"x ];then
            PRINT_LOG "INFO" "$i have Transmit-only"
            fn_writeResultFile "${RESULT_FILE}" "$i Transmit-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Symmetric"
+           PRINT_LOG "FATAL" "$i not have Transmit-only"
            fn_writeResultFile "${RESULT_FILE}" "$i not  Transmit-only" "fail"
        fi
        ethtool -A $j rx on
@@ -107,7 +103,6 @@ function clean_env()
         rm -rf network.txt
 
 }
-
 
 function main()
 {
