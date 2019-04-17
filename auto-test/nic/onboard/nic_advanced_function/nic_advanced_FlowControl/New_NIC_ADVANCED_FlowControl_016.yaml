@@ -1,0 +1,32 @@
+metadata:
+    name: "New_NIC_ADVANCED_FlowControl_016"
+    format: "boost-Test-Shell Test Definition 1.0"
+    description: "wang ka PAUSE No zhuang tai jian cha"
+    maintainer:
+        - lwx588815
+    os:
+        - centos
+        - debian
+        - ubuntu
+        - suse
+        - redhat
+    scope:
+        - nic
+    devices:
+        - d06
+        - d05
+    level: 1
+    totalcase:
+            centos: 1
+            debian: 1
+            suse: 1
+            redhat: 1
+            ubuntu: 1
+run:
+    steps:
+        - "cd auto-test/nic/onboard/nic_advanced_function/nic_advanced_FlowControl; ./New_NIC_ADVANCED_FlowControl_016.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
