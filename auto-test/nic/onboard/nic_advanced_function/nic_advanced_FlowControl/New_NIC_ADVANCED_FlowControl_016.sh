@@ -51,7 +51,7 @@ function init_env()
         fi
 
         #install
-       # fn_install_pkg "ethtool" 2
+        fn_install_pkg "ethtool" 2
 
         network=`ip link | grep "state UP" | awk '{ print $2 }' | sed 's/://g'|egrep -v "vir|br|docker|vnet"`
         for i in $network
@@ -82,12 +82,13 @@ function test_case()
        ethtool -A $j tx off 
        sleep 5
        PAUSE=`ethtool $j|grep "Advertised pause frame use:"|awk '{print $6}'`
+       echo "$PAUSE"
        if [ "$PAUSE"x = "Receive-only"x ];then
-           PRINT_LOG "INFO" "$i have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i have Symmetric" "pass"
+           PRINT_LOG "INFO" "$i have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$i have Receive-only" "pass"
        else
-           PRINT_LOG "FATAL" "$i not have Symmetric"
-           fn_writeResultFile "${RESULT_FILE}" "$i not have Symmetric" "fail"
+           PRINT_LOG "FATAL" "$i not have Receive-only"
+           fn_writeResultFile "${RESULT_FILE}" "$i not have Receive-only" "fail"
        fi
        ethtool -A $j tx on
     done
