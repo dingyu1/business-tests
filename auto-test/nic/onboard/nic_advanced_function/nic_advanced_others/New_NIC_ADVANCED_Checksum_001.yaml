@@ -1,5 +1,5 @@
 metadata:
-    name: "New_NIC_ADVANCED_Checksum_001
+    name: "New_NIC_ADVANCED_Checksum_001"
     format: "boost-Test-Shell Test Definition 1.0"
     description: "query the onboard nic default parameters"
     maintainer:

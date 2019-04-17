@@ -110,6 +110,7 @@ function test_case()
        fn_writeResultFile "${RESULT_FILE}" "rm two vlan" "fail"
     fi
  done
+      check_result ${RESULT_FILE}
 }
 
 

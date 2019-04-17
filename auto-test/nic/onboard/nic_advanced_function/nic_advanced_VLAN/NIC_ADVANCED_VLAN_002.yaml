@@ -1,5 +1,5 @@
 metadata:
-    name: NIC_ADVANCED_VLAN_002
+    name: "NIC_ADVANCED_VLAN_002"
     format: "boost-Test-Shell Test Definition 1.0"
     description: "boost is a c++ lib"
     maintainer:
