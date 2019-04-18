@@ -24,7 +24,7 @@ metadata:
         ubuntu: 1
 run:
     steps:
-        - "cd  auto-test/disk/basic_function; bash New_Disk_004.yaml; cd -"
+        - "cd  auto-test/disk/basic_function; bash New_Disk_004.sh; cd -"
 parse:
     pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
     fixupdict:
