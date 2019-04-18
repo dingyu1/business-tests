@@ -87,8 +87,8 @@ function test_case()
      do
         ip link set $net mtu 9000
         sleep 2
-        sshpass -p root ssh root@$ip_board ip link set $net mtu 1500
-        sleep 5
+        sshpass -p root ssh root@$ip_board ip link set $net mtu 9000
+	sleep 5
      done
 #ping 命令查看是否丢包
      for j in $ARR2
