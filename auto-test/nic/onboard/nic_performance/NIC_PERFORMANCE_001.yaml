@@ -11,10 +11,9 @@ metadata:
         - suse
         - redhat
     scope:
-        - OS_d06_ssh_nic
+        - nic
     devices:
-        - d06
-        - d05
+        - OS_d06_ssh_nic
     level: 1
     totalcase:
             centos: 1
