@@ -23,10 +23,10 @@
 #*****************************************************************************************
 
 #加载公共函数
-. ../../../../utils/error_code.inc
-. ../../../../utils/test_case_common.inc
-. ../../../../utils/sys_info.sh
-. ../../../../utils/sh-test-lib     
+. ../../../utils/error_code.inc
+. ../../../utils/test_case_common.inc
+. ../../../utils/sys_info.sh
+. ../../../utils/sh-test-lib     
 #. ./utils/error_code.inc
 #. ./test_case_common.inc
 
@@ -54,9 +54,11 @@ EOF
 function init_env()
 {
     #检查结果文件是否存在，创建结果文件：
-	PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
+    PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
-    ethtool -h || fn_install_pkg ethtool 3
+    fio -h || fn_install_pkg fio 3
+    dmesg --clear
+
 }
 
 
