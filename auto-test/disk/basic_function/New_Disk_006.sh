@@ -19,16 +19,16 @@
 #	B)显示所有硬盘信息，大小无误
 #	C)正确显示pci信息
 #	D)OS正常运行，dmesg中无报错，硬盘可以正常读写
-#	E)前后一致                                                 
+#	E)前后不一致                                                 
 #*****************************************************************************************
 
 #加载公共函数
-. ../../../utils/error_code.inc
-. ../../../utils/test_case_common.inc
-. ../../../utils/sys_info.sh
-. ../../../utils/sh-test-lib     
-#. ./utils/error_code.inc
-#. ./test_case_common.inc
+. ../../../../utils/error_code.inc
+. ../../../../utils/test_case_common.inc
+. ../../../../utils/sys_info.sh
+. ../../../../utils/sh-test-lib     
+. ./utils/error_code.inc
+. ./test_case_common.inc
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
@@ -56,7 +56,7 @@ function init_env()
     #检查结果文件是否存在，创建结果文件：
 	PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
-    dmesg -c
+    ethtool -h || fn_install_pkg ethtool 3
 }
 
 
@@ -65,37 +65,43 @@ function init_env()
 function test_case()
 {
     #测试步骤实现部分
-	cpi_sequence=`fn_get_value ${TMPCFG} cpi_sequence`
-	lspci -s ${cpi_sequence} -vvv | grep "MSI.*Enable"
-	if [ $? -eq 0 ]
-	then
-		PRINT_LOG "INFO" "Check out MSI Enable lab."
-		fn_writeResultFile "${RESULT_FILE}" "MSI" "pass"
-	else
-		PRINT_LOG "FATAL" "Can not check MSI Enable lab,check it fail"
-		fn_writeResultFile "${RESULT_FILE}" "MSI" "fail"
-	fi
-	
-	blk_list=`lsblk -d| grep -v MOUNTPOINT| awk '{print $1}'`
-	PRINT_LOG "INFO" "blk list is $blk_list"
-	
-	
-	declare -a bare_disk_list
-	j=0
-	for i in $blk_list
-	do
-		lsblk -a | egrep -v "MOUNTPOINT" | grep "/" | grep $i
-		if [ $? -ne 0 ]
-		then
-			echo "$i is pure blk"
-			bare_disk_list[j]=$i
-			let j++
-		else
-			echo "$i is used for system parttion "
-		fi
-	
-	done
+    cpi_sequence=`fn_get_value ${TMPCFG} cpi_sequence`
+    dmidecode -t system | grep "Product" | grep "D06"
+    if [ $? -eq 0 ]
+    then
+        lspci -s ${cpi_sequence} -vvv | grep "MSI.*Enable"
+        if [ $? -eq 0 ]
+        then
+            PRINT_LOG "INFO" "Check out MSI Enable lab."
+            fn_writeResultFile "${RESULT_FILE}" "MSI" "pass"
+        else
+            PRINT_LOG "FATAL" "Can not check MSI Enable lab,check it fail"
+            fn_writeResultFile "${RESULT_FILE}" "MSI" "fail"
+        fi
+    else
+        PRINT_LOG "INFO" "env is D05 ,skip it test MSI"
+    fi
 
+
+    blk_list=`lsblk -d| grep "disk"| awk '{print $1}'`
+    PRINT_LOG "INFO" "blk list is $blk_list"
+
+
+    declare -a bare_disk_list
+    j=0
+    for i in $blk_list
+    do
+        lsblk -a  | grep "/" | grep $i
+        if [ $? -ne 0 ]
+        then
+            echo "$i is not system parttion"
+            bare_disk_list[j]=$i
+            let j++
+        else
+            echo "$i is used for system parttion "
+        fi
+
+    done
 	
 	
 	for blk in ${bare_disk_list[@]}
