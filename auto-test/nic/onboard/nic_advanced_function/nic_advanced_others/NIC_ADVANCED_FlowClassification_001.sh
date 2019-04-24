@@ -50,7 +50,7 @@ function init_env()
         fi
 
         #install
-       # fn_install_pkg "ethtool" 2
+       fn_install_pkg "ethtool" 2
 
         network=`ip link | grep "state UP" | awk '{ print $2 }' | sed 's/://g'|egrep -v "vir|br|docker|vnet"`
         for i in $network
