@@ -23,7 +23,7 @@
 . ../../../../utils/test_case_common.inc
 . ../../../../utils/sys_info.sh
 . ../../../../utils/sh-test-lib
-. ../../../../utils/sshpasswd.sh
+. ../../../../utils/env_parameter.inc
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
@@ -53,8 +53,8 @@ function init_env()
     fn_install_pkg "sshpass" 2
 
     network=`ip route | sed -r -n 's/.*dev (\w+).*src ([^ ]*) .*/\1 \2/p'|egrep -v "vir|br|vnet|lo" | awk '{print $1}'`
-    ip_board1="192.168.10.12 192.168.20.12 192.168.30.12 192.168.40.12 192.168.50.12"
-    ip_board="192.168.10.12"
+    ip_board1="$env_tc_on_board_fiber $env_tc_on_board_TP_20 $env_tc_on_board_TP_30 $env_tc_external_network_card_40 $env_tc_external_network_card_50"
+    ip_board="$env_tc_on_board_fiber"
 }
 
 

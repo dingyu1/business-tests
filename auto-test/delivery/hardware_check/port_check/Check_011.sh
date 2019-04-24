@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：Check_009                                                         
+# *用例名称：Check_011                                                         
 # *用例功能：enp125s0f0网口类型检查                                             
 # *作者：fwx654472                                                                       
 # *完成时间：2019-1-21                                                                   
@@ -20,8 +20,8 @@
 . ../../../../utils/test_case_common.inc
 . ../../../../utils/sys_info.sh
 . ../../../../utils/sh-test-lib     
-. ./error_code.inc
-. ./test_case_common.inc
+#. ./error_code.inc
+#. ./test_case_common.inc
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
