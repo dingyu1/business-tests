@@ -19,7 +19,7 @@ metadata:
             ubuntu: 1
 run:
     steps:
-        - "cd auto-test/nic/onboard/nic_performance; ./NIC_PERFORMANCE_001.sh; cd -"
+        - "cd auto-test/nic/onboard/onboard_nic_performance; ./onboard_NIC_PERFORMANCE_001.sh; cd -"
 parse:
    pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
    fixupdict:
