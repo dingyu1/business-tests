@@ -1,0 +1,27 @@
+metadata:
+    name: "NIC_PERFORMANCE_001"
+    format: "boost-Test-Shell Test Definition 1.0"
+    description: "server ping sut no loss package"
+    maintainer:
+        - lwx588815
+    os:
+        - centos
+        - ubuntu
+        - redhat
+    scope:
+        - nic
+    devices:
+        - OS_d06_ssh_nic
+    level: 1
+    totalcase:
+            centos: 1
+            redhat: 1
+            ubuntu: 1
+run:
+    steps:
+        - "cd auto-test/nic/onboard/nic_performance; ./NIC_PERFORMANCE_001.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
