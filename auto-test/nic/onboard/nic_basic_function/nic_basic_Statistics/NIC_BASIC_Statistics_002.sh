@@ -50,7 +50,7 @@ if [ `whoami` != 'root' ]
     return 1
 fi
 
-pkgs="ethtool"
+pkgs="ethtool sshpass"
 install_deps "$pkgs"
 
    
