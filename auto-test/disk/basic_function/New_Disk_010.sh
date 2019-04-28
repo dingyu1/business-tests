@@ -44,7 +44,7 @@ case_name=New_Disk_010
 EOF
 
 
-fn_del_parttion
+fn_del_parttion()
 {
     get_disk=$1
     cat <<EOF >${TMPFILE}
@@ -58,7 +58,7 @@ EOF
 	
 }
 
-fn_new_parttion
+fn_new_parttion()
 {
     get_disk=$1
 
@@ -84,6 +84,7 @@ function init_env()
     #检查结果文件是否存在，创建结果文件：
     PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
+    fio -h || fn_install_pkg fio 3
     dmesg --clear
 }
 
