@@ -1,5 +1,5 @@
 metadata:
-    name: New_Disk_004
+    name: New_Disk_010
     format: "Lava-Test-Shell Test Definition 1.0"
     description: "Fault tolerance test on the disk interface"
     maintainer:
@@ -24,7 +24,7 @@ metadata:
         ubuntu: 1
 run:
     steps:
-        - "cd  auto-test/disk/basic_function; bash New_Disk_004.sh; cd -"
+        - "cd  auto-test/disk/basic_function; bash New_Disk_010.sh; cd -"
 parse:
     pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
     fixupdict:

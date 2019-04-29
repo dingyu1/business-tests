@@ -1,25 +1,18 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：New_Disk_007                                                        
-# *用例功能：硬盘读写裸盘测试-SAS HDD盘                                         
+# *用例名称：New_Disk_008                                                        
+# *用例功能：硬盘读写文件系统测试-SAS HDD盘                                         
 # *作者：fwx654472                                                                       
 # *完成时间：2019-1-21                                                                   
 # *前置条件：                                                                            
-#	硬盘直通状态，硬盘SAS HDD满配 
+#   硬盘直通状态，硬盘SAS HDD满配 
 # *测试步骤：                                                                               
-#	1、OS正常运行的情况下，lsblk查看各个硬盘是否在位，有结果A）
-#	2、通过BMC查看硬盘是否在位，有结果B）
-#	3、使用lspci -s 74:02.0 -vvv 查看中断类型，MSI: Enable- 表示未使能，MSI-X: Enable+ 表示使能；有结果C）
-#	4、cat /proc/interrupts查看MSI中断数据；
-#	5、使用fio分别对非系统分区和其他所有所有盘下发bs=4k，iodepth=128读IO，有结果D）
-#	6、再次查看中断数据cat /proc/interrupts，对比步骤4和6前后数据是否一致，有结果E）
+#	1、OS正常运行的情况下，通过fdisk命令将硬盘分区，创建一个非系统分区，文件系统ext4，有结果A)
+#	2、使用fio分别对该非系统分区进行读写，有结果B)
 # *测试结果：                                                                            
-#	A)显示所有硬盘信息，大小无误
-#	B)显示所有硬盘信息，大小无误
-#	C)正确显示pci信息
-#	D)OS正常运行，dmesg中无报错，硬盘可以正常读写
-#	E)前后不一致                                                 
+#	A)分区创建成功
+#	B)OS正常运行，dmesg中无报错，硬盘可以正常读写                                                 
 #*****************************************************************************************
 
 #加载公共函数
@@ -27,7 +20,7 @@
 . ../../../utils/test_case_common.inc
 . ../../../utils/sys_info.sh
 . ../../../utils/sh-test-lib     
-#. ./utils/error_code.inc
+#. ./error_code.inc
 #. ./test_case_common.inc
 
 #获取脚本名称作为测试用例名称
@@ -47,8 +40,43 @@ cat << EOF > ${TMPCFG}
 disk_nums=12
 disk_type=sas
 cpi_sequence=74:02.0
-case_name=New_Disk_007
+case_name=New_Disk_008
 EOF
+
+
+fn_del_parttion()
+{
+    get_disk=$1
+    cat <<EOF >${TMPFILE}
+d
+1
+
+
+w
+EOF
+    cat ${TMPFILE} | fdisk ${get_disk}
+	
+}
+
+fn_new_parttion()
+{
+    get_disk=$1
+
+cat <<EOF >${TMPFILE}
+n
+p
+1
+
++50G
+
+
+w
+EOF
+
+    cat ${TMPFILE} | fdisk ${get_disk}
+	
+}
+
 
 #预置条件
 function init_env()
@@ -58,7 +86,6 @@ function init_env()
     fn_checkResultFile ${RESULT_FILE}
     fio -h || fn_install_pkg fio 3
     dmesg --clear
-
 }
 
 
@@ -87,8 +114,7 @@ function test_case()
 
     blk_list=`lsblk -d| grep "disk"| awk '{print $1}'`
     PRINT_LOG "INFO" "blk list is $blk_list"
-
-
+    
     declare -a bare_disk_list
     j=0
     for i in $blk_list
@@ -102,40 +128,43 @@ function test_case()
         else
             echo "$i is used for system parttion "
         fi
-
+    
     done
-	
-	
-	for blk in ${bare_disk_list[@]}
-	do
-		exec_before=`cat /proc/interrupts |awk '{print $1 $NF}'|grep -i cq | wc -l`
-		cat /proc/interrupts |awk '{print $1 $NF}'|grep -i cq >$TMPFILE
-		fio -filename=/dev/$blk -ioengine=sync -direct=1 -iodepth=128 -rw=randrw -rwmixread=70 -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
-		exec_after=`cat /proc/interrupts |awk '{print $1 $NF}'|grep -i cq | wc -l`
-		if [ ${exec_before} = ${exec_after} ]
-		then
-			PRINT_LOG "INFO" "test is interrupt  number isistent is ok "
-			interrupt_list=` cat /proc/interrupts |awk '{print $1 $NF}'|grep -i cq| awk -F":" '{print $1}'`
-			for interrupt_number in ${interrupt_list}
-			do
-				cat $TMPFILE | grep "${interrupt_number}"
-				if [ $? -eq 0 ]
-				then
-					PRINT_LOG "INFO" "test disk ${interrupt_number} is OK ,test is ok"
-					fn_writeResultFile "${RESULT_FILE}" "interrup_num" "pass"
-				else
-					PRINT_LOG "INFO" "test disk  ${interrupt_number} is new ,test is fail"
-					fn_writeResultFile "${RESULT_FILE}" "${interrupt_number}" "fail"
-				fi
-				
-			done
-		else
-			PRINT_LOG "FATAL" "test is interrupt  number is inconsistent ,test is fail "
-			fn_writeResultFile "${RESULT_FILE}" "interrup_num" "fail"
-		fi
-	
-	done
-	
+
+    
+    
+    for blk in ${bare_disk_list[@]}
+    do
+    
+        disk=/dev/${blk}
+        fn_del_parttion "${disk}"
+        fn_new_parttion "${disk}"
+        
+        fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randread -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
+        if [ $? -eq 0 ]
+        then
+            PRINT_LOG "INFO" "exec <fio -filename=${disk}> is ok "
+             fn_writeResultFile "${RESULT_FILE}" "${disk}" "pass"
+        else
+            PRINT_LOG "FATAL" "exec <fio -filename=${disk}> is fail"
+            fn_writeResultFile "${RESULT_FILE}" "${disk}" "fail"
+        fi
+        
+        tmp_dmesg=$TMPFILE.dmesg
+        dmesg > ${tmp_dmesg}
+        cat ${tmp_dmesg}| egrep -i "fail|error|warn"
+        if [ $? -eq 0 ]
+        then
+            PRINT_LOG "INFO" "exec fio common ,has some issue"
+            fn_writeResultFile "${RESULT_FILE}" "${interrupt_number}" "fail"
+            PRINT_FILE_TO_LOG "${tmp_dmesg}"
+        else    
+            PRINT_LOG "INFO" "exec fio commond is ok,no exception info "
+        fi
+        fn_del_parttion "${disk}"
+        
+    done
+    
 
 
 
@@ -150,6 +179,7 @@ function clean_env()
     FUNC_CLEAN_TMP_FILE
     #自定义环境恢复实现部分,工具安装不建议恢复
     #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
+    dmesg --clear
     PRINT_LOG "INFO" "*************************end of running test case<${test_name}>**********************************"
 }
 

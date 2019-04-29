@@ -55,31 +55,23 @@ function test_case()
          for i in $network_name
          do
           type=`ethtool -i $i|grep "driver"|awk -F ':' '{print $2}'|sed 's/ //g'`
-          if [ $type == "hns3" ];then
-              fn_writeResultFile "${RESULT_FILE}" "IS the onboard nic " "pass"
-              PRINT_LOG "INFO" "is the onboard nic success"
-          else
-              fn_writeResultFile "${RESULT_FILE}" "not onboard nic" "fail"
-              PRINT_LOG "FAIL" "not onboard nic"
-              exit 1
-          fi
+          if [ $type == "hns" ];then
 
-
-          ethtool -k $i         
-          if [ $? -eq 0 ];
-	  then
-              fn_writeResultFile "${RESULT_FILE}" "query the onboard nic default parameters" "pass"
-              PRINT_LOG "INFO" "query the onboard nic default parameters"
-          else
-              fn_writeResultFile "${RESULT_FILE}" "query the onboard nic default parameters" "fail"
-              PRINT_LOG "FAIL" "query the onboard nic default parameters"
-          fi
-
+             ethtool -k $i
+             if [ $? -eq 0 ];
+             then
+                fn_writeResultFile "${RESULT_FILE}" "query the onboard nic default parameters" "pass"
+                PRINT_LOG "INFO" "query the onboard nic default parameters"
+             else
+                fn_writeResultFile "${RESULT_FILE}" "query the onboard nic default parameters" "fail"
+                PRINT_LOG "FAIL" "query the onboard nic default parameters"
+             fi
+         fi
 
          done
          ethtool -K $i|sed -n '1,8p' > 1.log
          cat 1.log
-         
+
          check_result ${RESULT_FILE}
 
 

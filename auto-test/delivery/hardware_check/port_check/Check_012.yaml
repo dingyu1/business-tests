@@ -1,20 +1,20 @@
+
 metadata:
-    name: New_Disk_004
+    name: Check_012
     format: "Lava-Test-Shell Test Definition 1.0"
-    description: "Fault tolerance test on the disk interface"
+    description: "Fault tolerance test on the network interface"
     maintainer:
         - fan_xingguo@hoperun.com
     scope:
-        - sas_sata_disk
+        - delivery
     os:
         - centos
         - suse
         - redhat
         - debian
-        - ubuntu
+        - ubuntu  
     devices:
         - d05
-        - d06
     level: 1
     totalcase:
         centos: 1
@@ -24,12 +24,10 @@ metadata:
         ubuntu: 1
 run:
     steps:
-        - "cd  auto-test/disk/basic_function; bash New_Disk_004.sh; cd -"
+        - "cd auto-test/delivery/hardware_check/port_check; bash Check_012.sh; cd -"
 parse:
     pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
     fixupdict:
         FAIL: fail
         PASS: pass
-
-
 
