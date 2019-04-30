@@ -65,25 +65,25 @@ function test_case()
           str1=`ethtool $i |grep "FIBRE"`
           #判断是否支持开启自协商
           if [ "$str1" != "" ];
-	      then
+          then
               ethtool -s $i autoneg on > 1.log 2>&1
-              grep "not supported" 1.log
+              grep "not setting" 1.log
               if [ $? -eq 0 ];then
-             
+
                fn_writeResultFile "${RESULT_FILE}" "network_card_does_not_support_autoeng" "pass"
                PRINT_LOG "INFO" "network_card_does_not_support_autoeng"
               else
                fn_writeResultFile "${RESULT_FILE}" "network_card_set_autoeng" "fail"
                PRINT_LOG "FAIL" "network_card_set_autoeng"
               fi
-          
+
            #判断是否可以设置速率为10M/100M/1000M
            for j in 10 100 1000
            do
                ethtool -s $i speed $j > 2.log 2>&1
                echo $i
                echo $j
-               grep "not supported" 2.log
+               grep "not setting" 2.log
                if [ $? -eq 0 ];then
                   fn_writeResultFile "${RESULT_FILE}" "network_card_does_not_support_set_speed" "pass"
                   PRINT_LOG "INFO" "network_card_does_not_support_set_speed"
@@ -103,12 +103,12 @@ function test_case()
                 PRINT_LOG "FAIL" "network_card_set_speed"
               fi
 
-               
+
            done
-    
+
            #确认设置自协商没有成功
           auto=`ethtool $i|grep "Auto-negotiation"|awk -F ':' '{print $2}'|sed 's/ //g'`
-          echo $auto  
+          echo $auto
           if [ "$auto" == "off" ];
           then
               fn_writeResultFile "${RESULT_FILE}" "network_card_set_autoneg_does_not_success" "pass"
@@ -117,10 +117,10 @@ function test_case()
               fn_writeResultFile "${RESULT_FILE}" "network_card_set_autoeng" "fail"
               PRINT_LOG "FAIL" "network_card_set_autoeng"
           fi
-    
-     fi          
+
+     fi
 done
-         
+
 
          check_result ${RESULT_FILE}
 
