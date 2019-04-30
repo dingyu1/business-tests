@@ -14,10 +14,10 @@
 #*****************************************************************************************
 
 #加载公共函数
-. ../../../utils/error_code.inc
-. ../../../utils/test_case_common.inc
-. ../../../utils/sys_info.sh
-. ../../../utils/sh-test-lib
+. ../../../../../utils/error_code.inc
+. ../../../../../utils/test_case_common.inc
+. ../../../../../utils/sys_info.sh
+. ../../../../../utils/sh-test-lib
 #. ./utils/error_code.inc
 #. ./test_case_common.inc
 
@@ -38,6 +38,7 @@ function init_env()
 {
     #检查结果文件是否存在，创建结果文件：
     PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
+     fn_install_pkg "ethtool" 2
      lspci > /dev/null
      if [ $? -ne 0 ]
      then
