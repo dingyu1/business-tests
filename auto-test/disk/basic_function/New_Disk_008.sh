@@ -85,6 +85,7 @@ function init_env()
     PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
     fio -h || fn_install_pkg fio 3
+    cp ../../../utils/tools/fio ./. || PRINT_LOG "INFO" "cp fio is fail"
     dmesg --clear
 }
 
@@ -140,7 +141,7 @@ function test_case()
         fn_del_parttion "${disk}"
         fn_new_parttion "${disk}"
         
-        fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randread -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
+        fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randread -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test || ./fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randread -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
         if [ $? -eq 0 ]
         then
             PRINT_LOG "INFO" "exec <fio -filename=${disk}> is ok "
@@ -152,17 +153,17 @@ function test_case()
         
         tmp_dmesg=$TMPFILE.dmesg
         dmesg > ${tmp_dmesg}
-        cat ${tmp_dmesg}| egrep -i "fail|error|warn"
+        cat ${tmp_dmesg}| egrep -iw "fail|error|fatal"
         if [ $? -eq 0 ]
         then
             PRINT_LOG "INFO" "exec fio common ,has some issue"
-            fn_writeResultFile "${RESULT_FILE}" "${interrupt_number}" "fail"
+            fn_writeResultFile "${RESULT_FILE}" "${blk}_msg" "fail"
             PRINT_FILE_TO_LOG "${tmp_dmesg}"
         else    
             PRINT_LOG "INFO" "exec fio commond is ok,no exception info "
         fi
         fn_del_parttion "${disk}"
-        
+        dmesg --clear        
     done
     
 

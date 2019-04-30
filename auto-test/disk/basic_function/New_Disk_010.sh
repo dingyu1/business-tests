@@ -85,6 +85,8 @@ function init_env()
     PRINT_LOG "INFO" "*************************start to run test case<${test_name}>**********************************"
     fn_checkResultFile ${RESULT_FILE}
     fio -h || fn_install_pkg fio 3
+    cp ../../../utils/tools/fio  ./. || PRINT_LOG "INFO" "Cp fio fail"
+    chmod 777 fio
     dmesg --clear
 }
 
@@ -156,13 +158,13 @@ function test_case()
         if [ $? -eq 0 ]
         then
             PRINT_LOG "INFO" "exec fio common ,has some issue"
-            fn_writeResultFile "${RESULT_FILE}" "${interrupt_number}" "fail"
+            fn_writeResultFile "${RESULT_FILE}" "${blk}_msg" "fail"
             PRINT_FILE_TO_LOG "${tmp_dmesg}"
         else    
             PRINT_LOG "INFO" "exec fio commond is ok,no exception info "
         fi
         fn_del_parttion "${disk}"
-        
+        dmesg --clear
     done
     
 
