@@ -58,7 +58,7 @@ function init_env()
 function test_case()
 {   
     ip_board=$env_tc_on_board_fiber_0
-    netw=`ip route | sed -r -n 's/.*dev (\w+).*src ([^ ]*) .*/\1 \2/p'|egrep -v "vir|br|vnet|lo" |grep $ip_board|awk '{print $1}'`
+    netw=`ip route | sed -r -n 's/.*dev (\w+).*src ([^ ]*) .*/\1 \2/p'|egrep -v "vir|br|vnet|lo" |grep "$env_sut_on_board_fiber_0"|awk '{print $1}'`
     network=`ip route | sed -r -n 's/.*dev (\w+).*src ([^ ]*) .*/\1 \2/p'|egrep -v "vir|br|vnet|lo|$netw"|awk '{print $1}'`
     for i in $network
     do	
