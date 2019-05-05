@@ -19,7 +19,7 @@
 . ../../../../../utils/test_case_common.inc
 . ../../../../../utils/error_code.inc
 . ../../../../../utils/sys_info.sh
-. .../../../../../utils/sh-test-lib		
+. ../../../../../utils/sh-test-lib		
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
