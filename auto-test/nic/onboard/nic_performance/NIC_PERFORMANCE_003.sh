@@ -53,13 +53,13 @@ test_result="pass"
 
 debug=false
 
-client_ip_10=$env_sut_on_board_fiber_10
+client_ip_10=$env_sut_on_board_fiber_0
 client_ip_20=$env_sut_on_board_TP_20
 client_ip_30=$env_sut_on_board_TP_30
 client_ip_40=$env_sut_external_network_card_40
 #client_ip_50=$env_sut_external_network_card_50
 
-server_ip_10=$env_tc_on_board_fiber_10
+server_ip_10=$env_tc_on_board_fiber_0
 server_ip_20=$env_tc_on_board_TP_20
 server_ip_30=$env_tc_on_board_TP_30
 server_ip_40=$env_tc_external_network_card_40
@@ -110,6 +110,9 @@ function file_transport_test(){
 		PRINT_LOG "INFO" "$SCP root@${client_ip_10}:/root/testfile root@${server_ip_10}:/root/testfile1"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_10}" "fail"
 		ip a
+		echo "client-------------"
+		ping $env_tc_on_board_fiber_0 -c 3
+		$SSH root@$env_tc_on_board_fiber_0 "ip a"
 		return 1
     fi
     
@@ -201,9 +204,9 @@ function clean_env()
     FUNC_CLEAN_TMP_FILE
     #自定义环境恢复实现部分,工具安装不建议恢复
       #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"  
-    #$SSH root@$client_ip_10 "rm -f /root/testfile*"
     rm -f /root/testfile*
-    $SSH root@$server_ip_10 "rm -f /root/testfile*"
+    #$SSH root@$server_ip_10 "rm -f /root/testfile*"
+	$SSH root@$env_tc_on_board_fiber_0 "rm -f /root/testfile*"
 
 }
 
