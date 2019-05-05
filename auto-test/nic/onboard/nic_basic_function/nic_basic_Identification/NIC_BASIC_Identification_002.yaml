@@ -1,0 +1,33 @@
+metadata:
+    name: NIC_BASIC_Identification_002
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: ""
+    maintainer:
+        - min_shuai@hoperun.com
+    scope:
+        - shencheng
+    os:
+        - centos 
+        - debian 
+        - redhat 
+        - suse 
+        - ubuntu  
+    devices:
+        - d05
+        - d06
+    level: 1
+    totalcase:
+        centos: 1
+run:
+    steps:
+        - "cd auto-test/nic/onboard/nic_basic_function/nic_basic_Identification; ./NIC_BASIC_Identification_002.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
+   
+   
+   
+   
+   
