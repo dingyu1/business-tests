@@ -130,7 +130,7 @@ function init_env()
 #测试执行
 function test_case()
 {
-	wget --tries=3 -c http://172.19.20.15:8083/open-estuary/old_iso/centos/auto-install.iso -O centos.iso
+	wget --tries=3 -c http://172.19.20.15:8083/open-estuary/old_iso/centos/Centos7-5-1804/auto-install.iso -O centos.iso
 	mv centos.iso ${TMPDIR}/cdrom_1.iso
 	
 	#sshpass -p 123456 scp -o StrictHostKeyChecking=no minshuai@192.168.1.107:/var/www/html/rp1612/v5.2-rc4/CentOS/centos-everything-v5.2-rc4.iso ${TMPDIR}
@@ -156,6 +156,8 @@ function test_case()
 	else
 		PRINT_LOG "FATAL" "error mounting file, please check it."
 		fn_writeResultFile "${RESULT_FILE}" "mount_file" "fail"
+		lsblk
+		ls ${TMPDIR}
 	fi
 	
 	#将复制光驱文件当作硬盘分区挂载
