@@ -142,7 +142,7 @@ function test_case()
         fn_del_parttion "${disk}"
         fn_new_parttion "${disk}"
         
-        fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randwrite -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
+        fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randwrite -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test || ./fio -filename=${disk} -ioengine=sync -direct=1 -iodepth=128 -rw=randwrite -bs=4k -size=1G -numjobs=8 -runtime=10 -group_reporting -name=fio_test
         if [ $? -eq 0 ]
         then
             PRINT_LOG "INFO" "exec <fio -filename=${disk}> is ok "
