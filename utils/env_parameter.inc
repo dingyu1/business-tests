@@ -16,7 +16,7 @@ env_tc_external_network_card_40=192.168.40.12
 env_tc_external_network_card_50=192.168.50.12
 env_tc_bmc_ip=172.16.10.23
 
-env_tc_passwd=huawei12#$
+env_tc_passwd=root
 env_sut_user=root
 env_tc_user=root
-env_sut_passwd=huawei12#$
+env_sut_passwd=root
