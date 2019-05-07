@@ -86,6 +86,7 @@ function init_env()
     fn_checkResultFile ${RESULT_FILE}
     fio -h || fn_install_pkg fio 3
     cp ../../../utils/tools/fio ./. || PRINT_LOG "INFO" "cp fio is fail"
+    chmod 777 fio
     dmesg --clear
 }
 
