@@ -111,9 +111,9 @@ function file_transport_test(){
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_10}" "fail"
 		ip a
 		echo "client-------------"
-		ping $env_tc_on_board_fiber_0 -c 3
-		$SSH root@$env_tc_on_board_fiber_0 "ip a"
-		return 1
+		ping $server_ip_10 -c 3
+		$SSH root@$server_ip_10 "ip a"
+
     fi
     
     $SCP root@${server_ip_20}:/root/testfile1 root@${client_ip_20}:/root/testfile2 
@@ -125,7 +125,7 @@ function file_transport_test(){
         PRINT_LOG "FATAL" "copy file error, please check your network"
 		PRINT_LOG "INFO" " $SCP root@${server_ip_20}:/root/testfile1 root@${client_ip_20}:/root/testfile2"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_20}" "fail"
-		return 1
+		ping $server_ip_20 -c 3
     fi
     
     $SCP root@${client_ip_30}:/root/testfile2 root@${server_ip_30}:/root/testfile3 
@@ -136,7 +136,7 @@ function file_transport_test(){
     else
         PRINT_LOG "FATAL" "copy file error, please check your network"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_30}" "fail"
-		return 1
+		ping $server_ip_30 -c 3
     fi
     
     $SCP root@${server_ip_40}:/root/testfile3 root@${client_ip_40}:/root/testfile4
@@ -148,7 +148,7 @@ function file_transport_test(){
         PRINT_LOG "FATAL" "copy file error, please check your network"
 		PRINT_LOG "INFO" "$SCP root@${server_ip_40}:/root/testfile3 root@${client_ip_40}:/root/testfile4"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_40}" "fail"
-		return 1
+		ping $server_ip_40 -c 3
     fi
     
     md5_testfile4=`md5sum /root/testfile4 |awk '{print $1}'`
@@ -160,7 +160,7 @@ function file_transport_test(){
     else
         PRINT_LOG "FATAL" "md5_testfile=${md5_testfile}-----md5_testfile4=${md5_testfile4} ,two value is not equal please check it . "
         fn_writeResultFile "${RESULT_FILE}" "md5value" "fail"
-		return 1
+
     fi
 }
 
@@ -219,7 +219,6 @@ function main()
     fi
     clean_env || test_result="fail"
     [ "${test_result}" = "pass" ] || return 1
-    
 }
 
 main $@
