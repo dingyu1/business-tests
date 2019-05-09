@@ -1,0 +1,34 @@
+metadata:
+    name: onboard_NIC_BASIC_Negotiation_001
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "network speed negotiation"
+    maintainer:
+        - min_shuai@hoperun.com
+    scope:
+        - nic
+    os:
+        - centos 
+        - debian 
+        - redhat 
+        - suse 
+        - ubuntu  
+    devices:
+        - OS_d06_ssh_nic
+    level: 1
+    totalcase:
+        centos: 1
+        debian: 1
+        redhat: 1
+        suse: 1
+        ubuntu: 1 
+run:
+    steps:
+        - "cd auto-test/nic/onboard/nic_basic_function/nic_basic_Negotiation; ./onboard_NIC_BASIC_Negotiation_001.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
+   
+   
+   
