@@ -5,7 +5,7 @@ metadata:
     maintainer:
         - min_shuai@hoperun.com
     scope:
-        - minshuai
+        - system
     os:
         - centos  
         - suse
@@ -14,6 +14,7 @@ metadata:
         - ubuntu
     devices:
         - d05
+        - d06
     level: 1
     totalcase:
         centos: 1

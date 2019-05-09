@@ -85,8 +85,8 @@ if [ $debug = true ];then
 fi
 
 
-SCP="sshpass -p $password scp -o StrictHostKeyChecking=no"
-SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no"
+SCP="sshpass -p $password scp -o StrictHostKeyChecking=no -o ConnectTimeout=5"
+SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5"
 
 #************************************************************#
 # Name        : file_transport_test                        #
@@ -100,7 +100,7 @@ function file_transport_test(){
     md5_testfile=`md5sum /root/testfile |awk '{print $1}'`  
     PRINT_LOG "INFO" "md5_testfile<$md5_testfile>"
     
-    $SCP root@${client_ip_10}:/root/testfile root@${server_ip_10}:/root/testfile1 
+    $SCP /root/testfile root@${server_ip_10}:/root/testfile1 
     if [ $? -eq 0 ]
     then
         PRINT_LOG "INFO" "file copy success from port ${server_ip_10}"
@@ -116,7 +116,7 @@ function file_transport_test(){
 
     fi
     
-    $SCP root@${server_ip_20}:/root/testfile1 root@${client_ip_20}:/root/testfile2 
+    $SCP root@${server_ip_20}:/root/testfile1 /root/testfile2 
     if [ $? -eq 0 ]
     then
         PRINT_LOG "INFO" "file copy success from port ${server_ip_20}"
@@ -128,7 +128,7 @@ function file_transport_test(){
 		ping $server_ip_20 -c 3
     fi
     
-    $SCP root@${client_ip_30}:/root/testfile2 root@${server_ip_30}:/root/testfile3 
+    $SCP /root/testfile2 root@${server_ip_30}:/root/testfile3 
     if [ $? -eq 0 ]
     then
         PRINT_LOG "INFO" "file copy success from port ${server_ip_30}"
@@ -139,7 +139,7 @@ function file_transport_test(){
 		ping $server_ip_30 -c 3
     fi
     
-    $SCP root@${server_ip_40}:/root/testfile3 root@${client_ip_40}:/root/testfile4
+    $SCP root@${server_ip_40}:/root/testfile3 /root/testfile4
     if [ $? -eq 0 ]
     then
         PRINT_LOG "INFO" "file copy success from port ${server_ip_40}"
@@ -160,7 +160,6 @@ function file_transport_test(){
     else
         PRINT_LOG "FATAL" "md5_testfile=${md5_testfile}-----md5_testfile4=${md5_testfile4} ,two value is not equal please check it . "
         fn_writeResultFile "${RESULT_FILE}" "md5value" "fail"
-
     fi
 }
 
