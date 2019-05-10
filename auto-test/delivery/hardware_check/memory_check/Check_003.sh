@@ -45,16 +45,19 @@ function init_env()
 		return 1
 	fi
 	#调用函数安装unzip
+	fn_install_pkg "gcc" 3
+	fn_install_pkg "make" 3
 	fn_install_pkg "unzip" 3
 	
 	
 #解压lmbench-master文件 路径需要可根据实际修改 cp到本地目录
 	
 	cd ../../../../utils/tools
+	cp lmbench-master.zip /home
+	cd /home
 	unzip lmbench-master.zip
 	cd lmbench-master/src
 	make 
-	cd -
 }
 
 #测试执行
@@ -62,7 +65,7 @@ function test_case()
 {
 	#查询内存
 	
-	cd ../../../../utils/tools/lmbench-master/bin
+	cd /home/lmbench-master/bin
 	memory=`free -m|grep Mem|awk '{print $2}'`
 	echo "total memory："$memory"MB"
 	
