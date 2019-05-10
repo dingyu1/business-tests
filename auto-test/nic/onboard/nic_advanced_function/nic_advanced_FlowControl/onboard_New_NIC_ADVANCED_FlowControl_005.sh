@@ -94,7 +94,7 @@ function init_env()
     fi
 	distinguish_card
     dmesg --clear
-
+ethtool -h || fn_install_pkg "ethtool" 10
 }
 
 #测试执行
