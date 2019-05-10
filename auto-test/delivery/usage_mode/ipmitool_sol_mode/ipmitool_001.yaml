@@ -1,0 +1,28 @@
+
+metadata:
+    name: ipmitool_001
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "ipmitool SOL mode"
+    maintainer:
+        - ding_yu1@hoperun.com
+    scope:
+        - delivery
+    os:
+        - centos
+    devices:
+        - d05
+        - d06
+    level: 1
+    totalcase:
+        centos: 1
+
+run:
+    steps:
+        - "cd auto-test/delivery/usage_mode/ipmitool_sol_mode; ./ipmitool_001.sh; cd -"
+parse:
+    pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+    fixupdict:
+        FAIL: fail
+        PASS: pass
+
+
