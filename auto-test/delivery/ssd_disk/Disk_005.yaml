@@ -1,7 +1,7 @@
 metadata:
-    name: "Check_007"
+    name: "Disk_005"
     format: "boost-Test-Shell Test Definition 1.0"
-    description: "check cpu"
+    description: "check ssd"
     maintainer:
         - chen_zhengfeng@hoperun.com
     os:
@@ -24,9 +24,10 @@ metadata:
             debian: 1
 run:
     steps:
-        - "cd auto-test/delivery/hardware_check/cpu_check; ./Check_007.sh; cd -"
+        - "cd auto-test/delivery/ssd_disk; ./Disk_005.sh; cd -"
 parse:
    pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
    fixupdict:
        FAIL: fail
        PASS: pass
+

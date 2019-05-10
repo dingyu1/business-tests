@@ -1,28 +1,32 @@
-
-
 metadata:
-    name: Check_005
-    format: "Lava-Test-Shell Test Definition 1.0"
-    description: "dmidecode  memory Speed"
+    name: "Check_005"
+    format: "boost-Test-Shell Test Definition 1.0"
+    description: "check member"
     maintainer:
-        - xue_xing@hoperun.com
-    scope:
-        - czfgd
+        - chen_zhengfeng@hoperun.com
     os:
         - centos
+        - debian
+        - ubuntu
+        - suse
+        - redhat
+    scope:
+        - delivery
     devices:
+        - d06
         - d05
     level: 1
     totalcase:
-        centos: 1
-
+            centos: 1
+            redhat: 1
+            ubuntu: 1
+            suse: 1
+            debian: 1
 run:
     steps:
         - "cd auto-test/delivery/hardware_check/memory_check; ./Check_005.sh; cd -"
 parse:
-    pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
-    fixupdict:
-        FAIL: fail
-        PASS: pass
-
-
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
