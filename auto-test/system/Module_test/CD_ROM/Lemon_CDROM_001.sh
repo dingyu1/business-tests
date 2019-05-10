@@ -119,7 +119,7 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user " 
         return 1
     fi
-	
+	wget -h || fn_install_pkg "wget" 10	
 	clean
 	prepare
     #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份 
