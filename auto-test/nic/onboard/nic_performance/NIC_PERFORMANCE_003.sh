@@ -85,8 +85,10 @@ if [ $debug = true ];then
 fi
 
 
-SCP="sshpass -p $password scp -o StrictHostKeyChecking=no -o ConnectTimeout=5"
-SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5"
+#SCP="sshpass -p $password scp -o StrictHostKeyChecking=no -o ConnectTimeout=5"
+#SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5"
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 #************************************************************#
 # Name        : file_transport_test                        #
@@ -97,58 +99,61 @@ SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5"
 function file_transport_test(){
     
     dd if=/dev/zero of=/root/testfile bs=1M count=2048
+	ls /root/testfile
     md5_testfile=`md5sum /root/testfile |awk '{print $1}'`  
     PRINT_LOG "INFO" "md5_testfile<$md5_testfile>"
     
     $SCP /root/testfile root@${server_ip_10}:/root/testfile1 
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port ${server_ip_10}"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_10}" "pass"
+        PRINT_LOG "INFO" "$SCP /root/testfile root@${server_ip_10}:/root/testfile1 "
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_10}" "pass"
     else
-        PRINT_LOG "FATAL" "copy file error, please check your network"
-		PRINT_LOG "INFO" "$SCP root@${client_ip_10}:/root/testfile root@${server_ip_10}:/root/testfile1"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_10}" "fail"
+		PRINT_LOG "INFO" "$SCP /root/testfile root@${server_ip_10}:/root/testfile1 "
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_10}" "fail"
 		ip a
-		echo "client-------------"
+		$SSH root@${server_ip_10} ls /root/testfile1 
 		ping $server_ip_10 -c 3
-		$SSH root@$server_ip_10 "ip a"
-
+		return 1
     fi
     
     $SCP root@${server_ip_20}:/root/testfile1 /root/testfile2 
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port ${server_ip_20}"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_20}" "pass"
+        PRINT_LOG "INFO" "$SCP root@${server_ip_20}:/root/testfile1 /root/testfile2"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_20}" "pass"
     else
-        PRINT_LOG "FATAL" "copy file error, please check your network"
-		PRINT_LOG "INFO" " $SCP root@${server_ip_20}:/root/testfile1 root@${client_ip_20}:/root/testfile2"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_20}" "fail"
+        PRINT_LOG "INFO" "$SCP root@${server_ip_20}:/root/testfile1 /root/testfile2"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_20}" "fail"
+		ls /root/testfile2
 		ping $server_ip_20 -c 3
+		return 1
     fi
     
     $SCP /root/testfile2 root@${server_ip_30}:/root/testfile3 
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port ${server_ip_30}"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_30}" "pass"
+        PRINT_LOG "INFO" "$SCP /root/testfile2 root@${server_ip_30}:/root/testfile3"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_30}" "pass"
     else
-        PRINT_LOG "FATAL" "copy file error, please check your network"
-        fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_30}" "fail"
+        PRINT_LOG "INFO" "$SCP /root/testfile2 root@${server_ip_30}:/root/testfile3"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_${server_ip_30}" "fail"
+		$SSH root@${server_ip_30} ls /root/testfile3 
 		ping $server_ip_30 -c 3
+		return 1
     fi
     
-    $SCP root@${server_ip_40}:/root/testfile3 /root/testfile4
+    $SCP root@${server_ip_40}:/root/testfile3 /root/testfile4 
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port ${server_ip_40}"
+        PRINT_LOG "INFO" "$SCP root@${server_ip_40}:/root/testfile3 /root/testfile4"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_40}" "pass"
     else
-        PRINT_LOG "FATAL" "copy file error, please check your network"
-		PRINT_LOG "INFO" "$SCP root@${server_ip_40}:/root/testfile3 root@${client_ip_40}:/root/testfile4"
+        PRINT_LOG "INFO" "$SCP root@${server_ip_40}:/root/testfile3 /root/testfile4"
         fn_writeResultFile "${RESULT_FILE}" "copy file ${server_ip_40}" "fail"
+		ls /root/testfile4
 		ping $server_ip_40 -c 3
+		return 1
     fi
     
     md5_testfile4=`md5sum /root/testfile4 |awk '{print $1}'`
@@ -175,7 +180,6 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user " 
         return 1
     fi
-    
     sshpass -h || fn_install_pkg "sshpass" 10
     #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份 
       #需要安装工具，使用公共函数install_deps，用法：install_deps "${pkgs}"
@@ -189,7 +193,8 @@ function test_case()
 
     for ((i=1;i<=3;i++))
     do
-        file_transport_test 
+        file_transport_test
+		[ $? -eq 0 ] || return 1
     done
 
     #检查结果文件，根据测试选项结果，有一项为fail则修改test_result值为fail，
@@ -206,7 +211,6 @@ function clean_env()
     rm -f /root/testfile*
     #$SSH root@$server_ip_10 "rm -f /root/testfile*"
 	$SSH root@$env_tc_on_board_fiber_0 "rm -f /root/testfile*"
-
 }
 
 function main()
