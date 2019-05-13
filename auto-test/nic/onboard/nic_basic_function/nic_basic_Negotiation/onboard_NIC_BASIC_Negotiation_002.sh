@@ -159,7 +159,8 @@ function init_env()
         return 1
     fi
 	sshpass -h || fn_install_pkg "sshpass" 10
-	distinguish_card
+ethtool -h || fn_install_pkg "ethtool" 10	
+distinguish_card
 	for net in ${onboard_tp_card[@]}
 	do
 		ethtool -s $net autoneg on
