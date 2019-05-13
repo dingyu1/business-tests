@@ -56,6 +56,7 @@ function init_env()
 	cp lmbench-master.zip /home
 	cd /home
 	unzip lmbench-master.zip
+	chmod -R 777 lmbench-master
 	cd lmbench-master/src
 	make 
 }
