@@ -67,7 +67,8 @@ else
     echo "netperf is already installed"
 fi
 
-
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
   
 }
 
@@ -125,8 +126,8 @@ netserver
 
 #在对端向本端发包
 path=`pwd`
-sshpass -p root scp $path/install_netperf.sh  root@$env_tc_on_board_fiber_10:/root/
-sshpass -p root ssh -p 22 -o StrictHostKeyChecking=no root@$env_tc_on_board_fiber_10 "bash install_netperf.sh; netperf -H $env_sut_on_board_fiber_10 -t UDP_STREAM –l 30 -- -m 10240; exit"
+$SCP $path/install_netperf.sh  root@$env_tc_on_board_fiber_10:/root/
+$SSH root@$env_tc_on_board_fiber_10 "bash install_netperf.sh; netperf -H $env_sut_on_board_fiber_10 -t UDP_STREAM -l 30 -- -m 10240; exit"
 
 
 #查询网卡在客户端发包后的收包信息

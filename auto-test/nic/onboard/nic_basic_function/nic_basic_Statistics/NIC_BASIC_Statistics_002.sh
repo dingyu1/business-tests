@@ -53,6 +53,8 @@ fi
 pkgs="ethtool sshpass"
 install_deps "$pkgs"
 
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
    
 }
 
@@ -73,7 +75,7 @@ rx_num=`ethtool -S $sut_eth |grep mac_rx_total_pkt_num|awk '{print $2}'`
 
 
 #在客户端ping服务端
-sshpass -p root ssh -p 22 -o StrictHostKeyChecking=no root@{$tc_ip_20} "ping ${sut_ip_20} -c 1000"
+$SSH root@{$tc_ip_20} "ping ${sut_ip_20} -c 1000"
 
 
 #查询网卡在客户端发包后的收包信息
