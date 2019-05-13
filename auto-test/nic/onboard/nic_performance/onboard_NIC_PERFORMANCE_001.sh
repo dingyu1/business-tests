@@ -92,7 +92,7 @@ function test_case()
      do
         ip link set $net mtu 9000
         sleep 2
-        sshpass -p root ssh root@$ip_board ip link set $net mtu 9000
+        timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$ip_board ip link set $net mtu 9000
      sleep 5
      done
 #ping 命令查看是否丢包
