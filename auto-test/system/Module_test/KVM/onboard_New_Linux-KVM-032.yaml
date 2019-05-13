@@ -1,0 +1,32 @@
+metadata:
+    name: onboard_New_Linux-KVM-032
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Check hns function of vf"
+    maintainer:
+        - lirenxing2@hisilicon.com
+    scope:
+        - system
+    os:
+        - centos 
+        - debian 
+        - redhat 
+        - suse 
+        - ubuntu  
+    devices:
+        - D05
+        - D06
+    level: 1
+    totalcase:
+        centos: 1
+        debian: 1
+        redhat: 1
+        suse: 1
+        ubuntu: 1   
+run:
+    steps:
+        - "cd auto-test/system/Module_test/KVM; ./onboard_New_Linux-KVM-032.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
