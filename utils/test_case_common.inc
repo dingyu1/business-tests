@@ -3,7 +3,8 @@
 #=================================================
 # Global variable
 GLOBAL_BASH_PID=$$
-
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 
 #=================================================
