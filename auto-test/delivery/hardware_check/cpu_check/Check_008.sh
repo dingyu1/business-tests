@@ -17,10 +17,10 @@
 #*****************************************************************************************
 
 #加载公共函数
-. ./test_case_common.inc
-. ./error_code.inc
-#. ./common/sys_info.sh
-#. ./common/sh-test-lib		
+. ../../../../utils/test_case_common.inc
+. ../../../../utils/error_code.inc
+. ../../../../utils/sys_info.sh
+. ../../../../utils/sh-test-lib		
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
