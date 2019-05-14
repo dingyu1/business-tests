@@ -1,5 +1,5 @@
 metadata:
-    name: New_System_017
+    name: New_System_020
     format: "Lava-Test-Shell Test Definition 1.0"
     description: "LTP测试"
     maintainer:
@@ -25,7 +25,7 @@ metadata:
 
 run:
     steps:
-        - "cd auto-test/system/system_test; ./New_System_017.sh; cd -"
+        - "cd auto-test/system/system_test; ./New_System_020.sh; cd -"
 
 parse:
     pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
