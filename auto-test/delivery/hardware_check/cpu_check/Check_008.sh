@@ -16,13 +16,12 @@
 #   检查到cpu核数是96个                                                         
 #*****************************************************************************************
 
-#加载公共函数,具体看环境对应的位置修改
-. ../../../../utils/error_code.inc
-. ../../../../utils/test_case_common.inc
-. ../../../../utils/sys_info.sh
-. ../../../../utils/sh-test-lib
-#. ./utils/error_code.inc
-#. ./utils/test_case_common.inc
+#加载公共函数
+. ./test_case_common.inc
+. ./error_code.inc
+#. ./common/sys_info.sh
+#. ./common/sh-test-lib		
+
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
 #创建log目录
@@ -32,95 +31,69 @@ mkdir -p ${TMPDIR}
 TMPFILE=${TMPDIR}/${test_name}.tmp
 #存放每个测试步骤的执行结果
 RESULT_FILE=${TMPDIR}/${test_name}.result
-
-#自定义变量区域（可选）
-#var_name1="xxxx"
-#var_name2="xxxx"
 test_result="pass"
 
-
-
-function test_cpunum()
+#预置条件
+function init_env()
 {
+  #检查结果文件是否存在，创建结果文件：
+	fn_checkResultFile ${RESULT_FILE}
 	
+}
+
+#测试执行
+function test_case()
+{
+	#进入系统查询cpu核数是否是96
 	if ! dmesg|grep D06
-    then
-		echo "It is not D06"
-		PRINT_LOG "INFO" "It is not D06"
-		fn_writeResultFile "${RESULT_FILE}" "It is not D06" "pass"	
-	else
-		echo "It is D06"
-		#进入系统查询cpu核数是否是96
+	then
 		cpu_number=`cat /proc/cpuinfo |grep processor |sort -u|wc -l`
 		echo "cpu core number:"$cpu_number
-		if [ $cpu_number -eq 96 ]
+		if [ $cpu_number -ne 64 ]
 		then
-			echo "Cpu core Number is  96"
-			PRINT_LOG "FATAL" "Cpu core Number is  96"
-			fn_writeResultFile "${RESULT_FILE}" "Check_008" "pass"
+			echo "CpuNumber is not 64"
+			PRINT_LOG "FATAL" "CpuNumber is not 64"
+			fn_writeResultFile "${RESULT_FILE}" "Check_D05_CPU" "fail"
 		else		
-			echo "Cpu core Number is not 96"	
-			PRINT_LOG "INFO" "Cpu core Number is not 96"
-			fn_writeResultFile "${RESULT_FILE}" "Check_008" "fail"		
+			echo "CpuNumber is 64"	
+			PRINT_LOG "INFO" "CpuNumber is 64"
+			fn_writeResultFile "${RESULT_FILE}" "Check_D05_CPU" "pass"		
+		fi
+	else
+		cpu_number=`cat /proc/cpuinfo |grep processor |sort -u|wc -l`
+		echo "cpu core number:"$cpu_number
+		if [ $cpu_number -ne 96 ]
+		then
+			echo "CpuNumber is not 96"
+			PRINT_LOG "FATAL" "CpuNumber is not 96"
+			fn_writeResultFile "${RESULT_FILE}" "Check_D06_CPU" "fail"
+		else		
+			echo "CpuNumber is 96"	
+			PRINT_LOG "INFO" "CpuNumber is 96"
+			fn_writeResultFile "${RESULT_FILE}" "Check_D06_CPU" "pass"		
 		fi
 	fi
-
-		
+	
 	#检查结果文件，根据测试选项结果，有一项为fail则修改test_result值为fail，
 	check_result ${RESULT_FILE}
 
 }
 
-#预置条件
-function init_env()
-{
-    #检查结果文件是否存在，创建结果文件：
-    fn_checkResultFile ${RESULT_FILE}
-    
-    #root用户执行
-    if [ `whoami` != 'root' ]
-    then
-        PRINT_LOG "WARN" " You must be root user " 
-        return 1
-    fi
-	
-    #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份 
-      #需要安装工具，使用公共函数install_deps，用法：install_deps "${pkgs}"
-      #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
-}
-
-
-
-
-
-#测试执行
-function test_case()
-{
-	test_cpunum
-    #检查结果文件，根据测试选项结果，有一项为fail则修改test_result值为fail，
-    check_result ${RESULT_FILE}
-}
-
 #恢复环境
 function clean_env()
 {
-
-    #清除临时文件
-    FUNC_CLEAN_TMP_FILE
-    #自定义环境恢复实现部分,工具安装不建议恢复
-      #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
-
+	#清除临时文件
+	FUNC_CLEAN_TMP_FILE
 }
-
 
 function main()
 {
-    init_env || test_result="fail"
-    if [ ${test_result} = 'pass' ]
-    then
-        test_case || test_result="fail"
-    fi
-    clean_env || test_result="fail"
+	init_env || test_result = "fail"
+	if [ ${test_result} = "pass" ]
+	then
+		test_case || test_result="fail"
+	fi
+	clean_env || test_result="fail"
 	[ "${test_result}" = "pass" ] || return 1
 }
 
