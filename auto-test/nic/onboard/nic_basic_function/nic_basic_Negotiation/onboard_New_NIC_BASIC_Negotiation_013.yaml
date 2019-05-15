@@ -1,5 +1,5 @@
 metadata:
-    name: onboard_New_NIC_ADVANCED_FlowControl_005
+    name: onboard_New_NIC_BASIC_Negotiation_013
     format: "Lava-Test-Shell Test Definition 1.0"
     description: "Set up different MAC address"
     maintainer:
