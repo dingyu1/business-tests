@@ -16,10 +16,10 @@
 #*****************************************************************************************
 
 #加载公共函数
-. ../../utils/error_code.inc
-. ../../utils/test_case_common.inc
-. ../../utils/sys_info.sh
-. ../../utils/sh-test-lib 	
+. ../../../utils/error_code.inc
+. ../../../utils/test_case_common.inc
+. ../../../utils/sys_info.sh
+. ../../../utils/sh-test-lib 	
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
@@ -52,20 +52,20 @@ function test_case()
 {
 	#查询硬盘容量    
 	num=`lsblk |grep disk|awk '{print $1":"$4}'`
-	if [ $? -ne 0 ]
+	if [ $? -eq 0 ]
 	then
-	fn_writeResultFile "${RESULT_FILE}" "disk capacity："$num"" "pass"
+	fn_writeResultFile "${RESULT_FILE}" "disk_capacity："$num"" "pass"
 	else
-	fn_writeResultFile "${RESULT_FILE}" "disk capacity command " "fail"
+	fn_writeResultFile "${RESULT_FILE}" "disk_capacity_command " "fail"
 	fi
 	echo "disk capacity："$num" "
 	
 	number=`lsblk |grep disk|awk '{print $4}'|wc -l`
-	if [ $? -ne 0 ]
+	if [ $? -eq 0 ]
 	then
-	fn_writeResultFile "${RESULT_FILE}" "It has $number disk" "pass"
+	fn_writeResultFile "${RESULT_FILE}" "It_has_$number_disk" "pass"
 	else
-	fn_writeResultFile "${RESULT_FILE}" "lsblk command " "fail"
+	fn_writeResultFile "${RESULT_FILE}" "lsblk_command " "fail"
 	fi
 	echo "It has $number disk"
 	#检查结果文件，根据测试选项结果，有一项为fail则修改test_result值为fail，
