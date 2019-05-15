@@ -42,12 +42,13 @@ function init_env()
 	then
 		PRINT_LOG "INFO" "You must be root user " 
 		fn_writeResultFile "${RESULT_FILE}" "Run as root" "fail"
-		return 1
 	fi
-	#调用函数安装unzip
+	#调用函数安装gcc\make\unzip\
 	fn_install_pkg "gcc" 3
 	fn_install_pkg "make" 3
 	fn_install_pkg "unzip" 3
+	fn_install_pkg "automake" 3
+	fn_install_pkg "bc" 3
 	
 	
 #解压lmbench-master文件 路径需要可根据实际修改 cp到本地目录
@@ -57,8 +58,10 @@ function init_env()
 	cd /home
 	unzip lmbench-master.zip
 	chmod -R 777 lmbench-master
-	cd lmbench-master/src
-	make 
+	cd /home/lmbench-master/src
+	make
+	echo "make $?"
+	return 0
 }
 
 #测试执行
@@ -130,6 +133,7 @@ function test_case()
 #恢复环境
 function clean_env()
 {
+	rm -rf lmbench-master 
 	#清除临时文
 	FUNC_CLEAN_TMP_FILE
 }
