@@ -1,14 +1,14 @@
 #!/bin/bash
 
 #*****************************************************************************************
-#用例名称：onboard_New_NIC_BASIC_Negotiation_013
+#用例名称：New_NIC_BASIC_Negotiation_013
 #用例功能：对端指定100MSpeed开启自协商，本端板载电口自协商测试
 #作者：qwx655884
 #完成时间：
 #前置条件
 #  网卡为默认设置
 #测试步骤
-#  1、对端使用命令ethtool -s ethx  speed 100 duplex full autoneg on命令修改对端网卡速率。
+#  1、对端使用命令ethtool -s ethx  speed 100 duplex full autoneg on 命令修改对端网卡速率。
 #  2、待协商成功后，使用ethtool ethx查看测试端网卡适配信息，有结果A
 #  3、本端ping对端的ip，有结果B
 #  4、遍历板载电口
@@ -44,7 +44,7 @@ RESULT_FILE=${TMPDIR}/${test_name}.result
 #var_name2="xxxx"
 test_result="pass"
 
-debug=true
+debug=false
 
 sut_on_board_fiber_10=$env_sut_on_board_fiber_0
 sut_on_board_TP_20=$env_sut_on_board_TP_20
@@ -90,16 +90,23 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user "
         return 1
     fi
+	#安装ethtool工具
+	ethtool -h || fn_install_pkg ethtool 3
+	fn_install_pkg "gcc make tar wget sshpass net-tools" 2
 }
 
 #测试执行
 function test_case()
 {
-    SSH="sshpass -p root ssh -p 22 -o StrictHostKeyChecking=no"
+    SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+	SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     eth1=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_30 | awk '{print $NF}'`
     eth2=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_40 | awk '{print $NF}'`
     echo $eth1
     echo $eth2
+    #恢复网卡默认设置
+    ethtool -s $eth1 autoneg on
+    ethtool -s $eth2 autoneg on
     $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 speed 100 duplex full autoneg on"
     if [ $? -eq 0 ];then
         PRINT_LOG "INFO" "$eth1 set success"
@@ -117,44 +124,60 @@ function test_case()
         PRINT_LOG "FATAL" "$eth2 set fail."
         fn_writeResultFile "${RESULT_FILE}" "$eth2 set autoneg" "fail"
     fi
-    sleep 3  
-    $SSH root@$tc_on_board_fiber_10 "ethtool $eth1"
-    $SSH root@$tc_on_board_fiber_10 "ethtool $eth2"
+    sleep 3
+    $SSH root@$tc_on_board_fiber_10 ethtool $eth1
+    $SSH root@$tc_on_board_fiber_10 ethtool $eth2
 
     eth3=`ip a | grep $sut_on_board_TP_30 | awk '{print $NF}'`
-    ethtool $eth3
+    sleep 2
+    a=`ethtool $eth3`
     speed=`ethtool $eth3|grep Speed|awk '{print $2}'`
     Duplex=`ethtool $eth3|grep Duplex|awk '{print $2}'`
     Auto=`ethtool $eth3|grep Auto|awk '{print $2}'`
     if [ $speed = 100Mb/s ];then
-       if [ $Duplex = Full ];then
-         if [ $Auto = on ];then
-        PRINT_LOG "INFO" "$eth3 Auto_negotiation success"
-        fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "pass"
-    else
-        PRINT_LOG "FATAL" "$eth3 Auto_negotiation fail"
-        fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "fail"
-         fi
-       fi
-    fi
+        if [ $Duplex = Full ];then
+          if [ $Auto = on ];then
+            PRINT_LOG "INFO" "$eth3 Auto_negotiation success"
+            fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "pass"
+          else
+            PRINT_LOG "FATAL" "$Auto"
+            fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "fail"
+          fi
+        else
+            PRINT_LOG "FATAL" "$Duplex"
+            fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "fail"
+        fi
+      else
+          PRINT_LOG "FATAL" "$speed"
+          fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "fail"
+      fi
+
 
     eth4=`ip a | grep $sut_on_board_TP_40 | awk '{print $NF}'`
-    ethtool $eth4
-    speed=`ethtool $eth3|grep Speed|awk '{print $2}'`
-    Duplex=`ethtool $eth3|grep Duplex|awk '{print $2}'`
-    Auto=`ethtool $eth3|grep Auto|awk '{print $2}'`
+    sleep 2
+    b=`ethtool $eth4`
+    speed=`ethtool $eth4|grep Speed|awk '{print $2}'`
+    Duplex=`ethtool $eth4|grep Duplex|awk '{print $2}'`
+    Auto=`ethtool $eth4|grep Auto|awk '{print $2}'`
     if [ $speed = 100Mb/s ];then
        if [ $Duplex = Full ];then
          if [ $Auto = on ];then
-        PRINT_LOG "INFO" "$eth3 Auto_negotiation success"
-        fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "pass"
-    else
-        PRINT_LOG "FATAL" "$eth3 Auto_negotiation fail"
-        fn_writeResultFile "${RESULT_FILE}" "$eth3 Auto_negotiation" "fail"
+           PRINT_LOG "INFO" "$eth4 Auto_negotiation success"
+           fn_writeResultFile "${RESULT_FILE}" "$eth4 Auto_negotiation" "pass"
+         else
+           PRINT_LOG "FATAL" "$Auto"
+           fn_writeResultFile "${RESULT_FILE}" "$eth4 Auto_negotiation" "fail"
          fi
+       else
+           PRINT_LOG "FATAL" "$Duplex"
+           fn_writeResultFile "${RESULT_FILE}" "$eth4 Auto_negotiation" "fail"
        fi
-    fi
+     else
+         PRINT_LOG "FATAL" "$speed"
+         fn_writeResultFile "${RESULT_FILE}" "$eth4 Auto_negotiation" "fail"
+     fi
 
+     sleep 3 
    ping $tc_on_board_TP_30 -c 4
     if [ $? -eq 0 ];then
       PRINT_LOG "INFO" "$eth1 ping success"
@@ -186,8 +209,8 @@ function clean_env()
     #自定义环境恢复实现部分,工具安装不建议恢复
      #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
      #恢复对端环境
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 speed 1000 duplex full autoneg on"
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth2 speed 1000 duplex full autoneg on"
+    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 autoneg on"
+    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth2 autoneg on"
 }
 
 function main()
@@ -206,4 +229,5 @@ ret=$?
 #LAVA平台上报结果接口，勿修改
 lava-test-case "$test_name" --result ${test_result}
 exit ${ret}
+
 
