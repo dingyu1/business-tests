@@ -17,10 +17,10 @@
 #*****************************************************************************************
 
 #加载公共函数
-. ../../utils/error_code.inc
-. ../../utils/test_case_common.inc
-. ../../utils/sys_info.sh
-. ../../utils/sh-test-lib 		
+. ../../../utils/error_code.inc
+. ../../../utils/test_case_common.inc
+. ../../../utils/sys_info.sh
+. ../../../utils/sh-test-lib 		
 
 #获取脚本名称作为测试用例名称
 test_name=$(basename $0 | sed -e 's/\.sh//')
@@ -74,11 +74,11 @@ function test_case()
 		then
 			echo "No SSD"
 			PRINT_LOG "FATAL" "No SSD" 
-			fn_writeResultFile "${RESULT_FILE}" "No SSD" "fail"
+			fn_writeResultFile "${RESULT_FILE}" "No_SSD" "fail"
 		else
 			echo "has SSD"
 			PRINT_LOG "INFO" "SSD test pass" 
-			fn_writeResultFile "${RESULT_FILE}" "SSD test" "pass"
+			fn_writeResultFile "${RESULT_FILE}" "SSD_test" "pass"
 		fi
 		let i++
 	done
