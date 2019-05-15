@@ -63,7 +63,7 @@ function test_case()
                 then
                         nic_type=`ethtool $i|grep "Supported ports:"|awk '{print $4}'`
                         if [ "$nic_type" == "FIBRE" ];then
-                                ethtool $i|grep -A2  "Supported link modes:"|grep "10000baseSR"
+                                ethtool $i|grep -A2  "Supported link modes:"|grep "10000base"
 								if [ $? -eq 0 ];then
                                 let firbe_nic_num=$firbe_nic_num+1
                                 PRINT_LOG "INFO" "check FIBRE $i success,the current onboard nic is 10G,the current onboard nic num is $firbe_nic_num "
