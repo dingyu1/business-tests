@@ -125,34 +125,19 @@ TX_dropped_later=`awk -v line=$(awk '/TX/{print NR}' eth.log.later) '{if(NR==lin
 RX_overruns_later=`awk -v line=$(awk '/RX/{print NR}' eth.log.later) '{if(NR==line+1){print $5}}' eth.log.later`
 TX_overruns_later=`awk -v line=$(awk '/TX/{print NR}' eth.log.later) '{if(NR==line+1){print $5}}' eth.log.later`
 
-if [ $RX_packets_later -gt $RX_packets ]
+if [ $RX_packets_later -gt $RX_packets ] && [ $TX_packets_later -gt $TX_packets ] && [ $RX_dropped_later -eq $RX_dropped ] && [ $TX_dropped_later -eq $TX_dropped ] && [ $RX_overruns_later -eq $RX_overruns ] && [ $TX_overruns_later -eq $TX_overruns  ]
 then
-	if [ $TX_packets_later -gt $TX_packets ]
-	then
-		if [ $RX_dropped_later -eq 0 ]
-		then
-			if [ $TX_dropped_later -eq 0 ]
-			then
-				if [ $RX_overruns_later -eq 0 ]
-				then
-					if [ $TX_overruns_later -eq 0  ]
-					then
-						fn_writeResultFile "${RESULT_FILE}" "RX-TX-statistics" "pass"
-						PRINT_LOG "INFO" "Receiving and sending statistics are successful"
-					else
-						fn_writeResultFile "${RESULT_FILE}" "RX-TX-statistics" "fail"
-						PRINT_LOG "FATAL" "failed to Receiving and sending statistics  "
-					fi
-				fi
-			fi
-		fi
-	fi
+	fn_writeResultFile "${RESULT_FILE}" "RX-TX-statistics" "pass"
+	PRINT_LOG "INFO" "Receiving and sending statistics are successful"
+else
+	fn_writeResultFile "${RESULT_FILE}" "RX-TX-statistics" "fail"
+	PRINT_LOG "FATAL" "failed to Receiving and sending statistics  "
 fi
 
 #执行ip -s link ls 网口名 ，网口名不存在
 no_exist="eth64"
 ifconfig_error=`ip -s link ls $no_exist|grep "does not exist"`
-if [ $? -eq 0 ]
+if [ "${ifconfig_error}" != ""x ]
 then
 		fn_writeResultFile "${RESULT_FILE}" "no_exist_eth" "pass"
 		PRINT_LOG "INFO" "the network_card eth64 does not exist"
