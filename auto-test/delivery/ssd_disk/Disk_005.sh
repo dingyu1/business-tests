@@ -54,16 +54,16 @@ function test_case()
 	num=`lsblk |grep disk|awk '{print $1":"$4}'`
 	if [ $? -eq 0 ]
 	then
-	fn_writeResultFile "${RESULT_FILE}" "disk_capacity："$num"" "pass"
+	fn_writeResultFile "${RESULT_FILE}" "disk_capacity_command" "pass"
 	else
 	fn_writeResultFile "${RESULT_FILE}" "disk_capacity_command " "fail"
 	fi
-	echo "disk capacity："$num" "
+	echo "disk capacity：$num"
 	
 	number=`lsblk |grep disk|awk '{print $4}'|wc -l`
 	if [ $? -eq 0 ]
 	then
-	fn_writeResultFile "${RESULT_FILE}" "It_has_$number_disk" "pass"
+	fn_writeResultFile "${RESULT_FILE}" "It_has_number_disk" "pass"
 	else
 	fn_writeResultFile "${RESULT_FILE}" "lsblk_command " "fail"
 	fi
