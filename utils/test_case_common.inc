@@ -145,6 +145,8 @@ function PRINT_LOG()
         ;;
     esac
 }
+
+
 #**************************************************************
 # Name        : PRINT_FILE_TO_LOG                             *
 # Description : print file content into log file              *
@@ -237,6 +239,7 @@ function fn_writeResultFile()
     fi
 }
 
+
 #*************************************************************
 # Name        : fn_writeResultFile                           *
 # Description : create result file                           *
@@ -302,16 +305,17 @@ function clean_tmp_file()
     return 0
 }
 
+
 #*************************************************************
-# Name        : fn_install_pkg                           *
-# Description : install different distribution package                  *
-# Parameters  : $1 packages                               *
-# Parameter   : $2 times                               *
+# Name        : fn_install_pkg                               *
+# Description : install different distribution package       *
+# Parameters  : $1 packages                                  *
+# Parameter   : $2 times                                     *
 #*************************************************************
 fn_install_pkg()
 {
     pkgs=$1
-    exec_times=$2
+    exec_times=$2 || exec_times=1
     tmp_file=${TMPDIR}/tmp.file
     [ -f ${tmp_file} ] && :>${tmp_file}
     
@@ -360,6 +364,7 @@ fn_install_pkg()
     PRINT_FILE_TO_LOG "${tmp_file}"
 }
 
+
 function fn_exec_times()
 {
     cmd=$1
@@ -371,6 +376,7 @@ function fn_exec_times()
     done
     
 }
+
 
 #*************************************************************
 # Name        : fn_get_os_type                               *
@@ -403,7 +409,13 @@ function fn_get_os_type()
     eval  $1=$os_type
 }
 
+
 #获取插网线的网口
+#*************************************************************
+# Name        : fn_get_physical_network_card                 *
+# Description : fn_get_physical_network_card get_net_list    *
+# Parameters  : $1 is the name of get network insterface list*
+#*************************************************************
 function fn_get_physical_network_card() 
 {
 
@@ -428,6 +440,88 @@ function fn_get_physical_network_card()
     
     eval $1='${physical_network_card[@]}'
 
+}
+
+
+#获取sut:ip 网卡，TC端 ip 网卡对应关系
+#*************************************************************
+# Name        : fn_get_network_interface_ip                  *
+# Description : get network interface form sut and tc        *
+# Parameters  : $1 is wirte info into $1 tmp file            *
+#*************************************************************
+function fn_get_network_interface_ip()
+{
+
+    tmp_file=$1
+    fn_checkResultFile ${tmp_file}
+    #SCP="sshpass -p root scp -rp -o StrictHostKeyChecking=no -o ConnectTimeout=5"
+    #SSH="sshpass -p root ssh -o StrictHostKeyChecking=no"
+    #find / -name env_parameter.inc | xargs cat >$TMPFILE.env
+    cat env_parameter.inc >$TMPFILE.env
+    TMPCFG=$TMPFILE.env
+    env_tc_on_board_fiber_0=`fn_get_value ${TMPCFG} env_tc_on_board_fiber_0` 
+    fn_get_physical_network_card physical_network_card_list
+    for sut_network_interface in $physical_network_card_list
+    do
+
+        sut_network_interface_ip=`ip address show ${sut_network_interface} |  grep -w inet | awk -F'[ /]+' '{print $3}'`
+        ip_segent=`ip address show ${sut_network_interface} | grep -w inet | awk -F'[ /]+' '{print $3}' | awk -F"." '{print $1"."$2"."$3}'`
+        if [ $? -eq 0   ]
+        then
+            PRINT_LOG "INFO" "Get IP segment is ${ip_segent}"
+        else    
+            PRINT_LOG "WARN" "Can not get IP segment ,please check it "
+        fi
+        
+        tc_network_interface_ip=` cat ${TMPCFG} | grep -w "${ip_segent}" | grep env_tc |awk -F"=" '{print $2}'`
+        if [ $? -eq 0   ]
+        then
+            PRINT_LOG "INFO" "Server ip is<$tc_network_interface_ip>"
+        else    
+            PRINT_LOG "WARN" "Can not get IP please check it "
+        fi
+        
+             
+        #env_tc_on_board_fiber_0=`fn_get_value ${TMPCFG} env_tc_on_board_fiber_0`        
+        tc_network_interface=`${SSH} root@$env_tc_on_board_fiber_0 ip a | grep ${tc_network_interface_ip} | awk '{print $NF}'`
+        
+        fn_writeResultFile "${tmp_file}" "${sut_network_interface}:${sut_network_interface_ip}" "${tc_network_interface}:${tc_network_interface_ip}"
+        
+
+    done
+
+}
+
+
+
+#获取所有的裸盘非系统盘
+#*************************************************************
+# Name        : fn_get_bare_disk bare_disk_list              *
+# Description : get all of  bare disk                        *
+# Parameters  : $1 is the list of bare disk                  *
+#*************************************************************
+function fn_get_bare_disk()
+{
+    
+    blk_list=`lsblk -d| grep "disk"| awk '{print $1}'`
+    PRINT_LOG "INFO" "blk list is $blk_list"
+    
+    declare -a env_bare_disk_list
+    j=0
+    for i in $blk_list
+    do
+        lsblk -a  | grep "/" | grep $i
+        if [ $? -ne 0 ]
+        then
+            echo "$i is not system parttion"
+            env_bare_disk_list[j]=/dev/$i
+            let j++
+        else
+            echo "$i is used for system parttion "
+        fi
+    
+    done
+    eval  $1='${env_bare_disk_list[@]}'
 }
 
 
