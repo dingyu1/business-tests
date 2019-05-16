@@ -13,7 +13,7 @@
 #	2 执行dmidecode|grep -I "Current Speed"
 #	3 观察操作情况     
 # *测试结果：                                                                            
-#   显示cpu频率为：2.5GHZ                                                         
+#   显示cpu频率为：2.4GHZ                                                         
 #*****************************************************************************************
 
 #加载公共函数
@@ -38,23 +38,28 @@ function init_env()
 {
   #检查结果文件是否存在，创建结果文件：
 	fn_checkResultFile ${RESULT_FILE}
-	
+	#root用户执行
+	if [ `whoami` != 'root' ]
+	then
+		PRINT_LOG "INFO" "You must be root user " 
+		fn_writeResultFile "${RESULT_FILE}" "Run as root" "fail"
+	fi
 }
 
 #测试执行
 function test_case()
 {
-	#检查CPU频率为2.5GHz
+	#检查CPU频率为2.4GHz
     Frequency=`dmidecode|grep -I "Current Speed"|awk -F ":" '{print $2}'|head -n 1|awk '{print $1}'`
 	echo $Frequency"MHz"
-	if [ $Frequency != "2500" ]
+	if [ $Frequency != "2400" ]
 	then
-		echo "cpu frequency not is 2.5GHz"
-		PRINT_LOG "FATAL" "cpu frequency not is 2.5GHz"
+		echo "cpu frequency not is 2.4GHz"
+		PRINT_LOG "FATAL" "cpu frequency not is 2.4GHz"
 		fn_writeResultFile "${RESULT_FILE}" "Check_007" "fail"
 	else
-		echo "cpu frequency is 2.5GHz"
-		PRINT_LOG "INFO" "cpu frequency is 2.5GHz"
+		echo "cpu frequency is 2.4GHz"
+		PRINT_LOG "INFO" "cpu frequency is 2.4GHz"
 		fn_writeResultFile "${RESULT_FILE}" "Check_007" "pass"
 	fi	
 	#检查结果文件，根据测试选项结果，有一项为fail则修改test_result值为fail，
