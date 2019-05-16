@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：Performance2_008
+# *用例名称：onboard_Performance2_008
 # *用例功能：板载enp125s0f2电口小包（1000M）
 # *作者：wwx573515
 # *完成时间：2019-05-6
@@ -12,6 +12,7 @@
 # *测试步骤：
 #   1、 Server端：netserver
 #       SUT端：netperf -H <Server IP> -t UDP_STREAM –l 30 -- -m pkt_length –M pkt_length
+#       pkt_length遍历10240、60140
 #   2、 查看网卡统计没有丢包和错包
 #       测试结果数据在正常范围内
 # *测试结果：
@@ -39,6 +40,8 @@ RESULT_FILE=${TMPDIR}/${test_name}.result
 #var_name1="xxxx"
 #var_name2="xxxx"
 test_result="pass"
+SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 #预置条件
 function init_env()
@@ -61,17 +64,17 @@ function init_env()
     systemctl disable firewalld.service
     systemctl stop firewalld.service
 
-    wget ${ci_http_addr}/test_dependents/netperf-2.5.0.tar.gz
-    tar -zxvf netperf-2.5.0.tar.gz &&  cd netperf-netperf-2.5.0 && ./configure -build=alpha
+    wget ${ci_http_addr}/test_dependents/netperf.tar.gz
+    tar -zxvf netperf.tar.gz &&  cd netperf && ./configure -build=alpha
     make && make install && cd -
 
-    sshpass -p root ssh root@$ip_board "fn_install_pkg "gcc make tar wget sshpass net-tools" 2"
-    sshpass -p root ssh root@$ip_board "systemctl disable firewalld.service && systemctl stop firewalld.service"
-    sshpass -p root ssh root@$ip_board "ip link set $network mtu 1500"
-    sshpass -p root ssh root@$ip_board "wget ${ci_http_addr}/test_dependents/netperf-2.5.0.tar.gz"
-    sshpass -p root ssh root@$ip_board "tar -zxvf netperf-2.5.0.tar.gz "
-    sshpass -p root ssh root@$ip_board "cd netperf-netperf-2.5.0 && ./configure -build=alpha && make && make install && cd - "
-    sshpass -p root ssh root@$ip_board "netserver &"
+    $SSH root@$ip_board "yum install -y gcc make tar wget sshpass net-tools"
+    $SSH root@$ip_board "systemctl disable firewalld.service && systemctl stop firewalld.service"
+    $SSH root@$ip_board "ip link set $network mtu 1500"
+    $SSH root@$ip_board "wget ${ci_http_addr}/test_dependents/netperf.tar.gz"
+    $SSH root@$ip_board "tar -zxvf netperf.tar.gz "
+    $SSH root@$ip_board "cd netperf && ./configure -build=alpha && make && make install && cd - "
+    $SSH root@$ip_board "netserver &"
 
 }
 
@@ -91,30 +94,30 @@ function test_case()
          t=900
          max=`echo "$Throughput > $t"|bc`
          if [ $max -eq 1 ];then
-            PRINT_LOG "INFO" "$Throughput-ok"
-            fn_writeResultFile "${RESULT_FILE}" "$throughput_check" "pass"
+            PRINT_LOG "INFO" "${i}_speed_check_ok"
+            fn_writeResultFile "${RESULT_FILE}" "${i}_speed_check" "pass"
          else
-            PRINT_LOG "FATAL" "$Throughput-fail"
-            fn_writeResultFile "${RESULT_FILE}" "$throughput_check" "fail"
+            PRINT_LOG "FATAL" "${i}_speed_check_fail"
+            fn_writeResultFile "${RESULT_FILE}" "${i}_speed_check" "fail"
          fi
    done
          ifconfig $network 2>&1 |tee csh.txt
          errors=`cat csh.txt |grep "TX errors" |awk '{print $3}'|head -1`
          if [ $errors -eq $Errors ];then
-            PRINT_LOG "INFO" "not-have-errors"
-            fn_writeResultFile "${RESULT_FILE}" "errors_check" "pass"
+            PRINT_LOG "INFO" "Tx_errors_check_ok"
+            fn_writeResultFile "${RESULT_FILE}" "Tx_errors_check" "pass"
          else
-            PRINT_LOG "FATAL" "have-errors"
-            fn_writeResultFile "${RESULT_FILE}" "errors_check" "fail"
+            PRINT_LOG "FATAL" "Tx_errors_check_fail"
+            fn_writeResultFile "${RESULT_FILE}" "Tx_errors_check" "fail"
          fi
 
          drop=`cat csh.txt | grep "TX errors" |awk '{print $5}'|head -1`
          if [ $drop -eq $Dropped ];then
-            PRINT_LOG "INFO" "not-have-dropped"
-            fn_writeResultFile "${RESULT_FILE}" "dropped_check" "pass"
+            PRINT_LOG "INFO" "Tx_dropped_check_ok"
+            fn_writeResultFile "${RESULT_FILE}" "Tx_dropped_check" "pass"
          else
             PRINT_LOG "FATAL" "have-dropped"
-            fn_writeResultFile "${RESULT_FILE}" "dropped_check" "fail"
+            fn_writeResultFile "${RESULT_FILE}" "Tx_dropped_check" "fail"
          fi
    check_result ${RESULT_FILE}
 }
@@ -122,11 +125,11 @@ function test_case()
 #恢复环境
 function clean_env()
 {
-     sshpass -p root ssh root@$ip_board "rm -rf netperf-2.5.0.tar.gz"
-     sshpass -p root ssh root@$ip_board ps -ef | grep -i netserver |awk '{print $2}'|awk 'NR == 1'|tee pro_id.txt
+     $SSH root@$ip_board "rm -rf netperf.tar.gz"
+     $SSH root@$ip_board ps -ef | grep -i netserver |awk '{print $2}'|awk 'NR == 1'|tee pro_id.txt
      pro_id=`cat pro_id.txt`
-     sshpass -p root ssh root@$ip_board "kill -9 $pro_id"
-     rm -rf csh.txt csq.txt result.txt netperf-2.5.0.tar.gzs pro_id.txt
+     $SSH root@$ip_board "kill -9 $pro_id"
+     rm -rf csh.txt csq.txt result.txt netperf.tar.gzs pro_id.txt
 }
 
 function main()
