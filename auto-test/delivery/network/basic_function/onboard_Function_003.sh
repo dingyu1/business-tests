@@ -39,18 +39,18 @@ RESULT_FILE=${TMPDIR}/${test_name}.result
 #var_name1="xxxx"
 #var_name2="xxxx"
 test_result="pass"
-
+testcount=3
 debug=false
-client_ip_0=$env_sut_on_board_fiber_0
-client_ip_10=$env_sut_on_board_fiber_10
-client_ip_20=$env_sut_on_board_TP_20
-client_ip_30=$env_sut_on_board_TP_30
+#client_ip_0=$env_sut_on_board_fiber_0
+#client_ip_10=$env_sut_on_board_fiber_10
+sut_on_board_TP_20=$env_sut_on_board_TP_20
+#client_ip_30=$env_sut_on_board_TP_30
 #client_ip_40=$env_sut_external_network_card_40
 #client_ip_50=$env_sut_external_network_card_50
-server_ip_0=$env_tc_on_board_fiber_0
-server_ip_10=$env_tc_on_board_fiber_10
-server_ip_20=$env_tc_on_board_TP_20
-server_ip_30=$env_tc_on_board_TP_30
+#server_ip_0=$env_tc_on_board_fiber_0
+#server_ip_10=$env_tc_on_board_fiber_10
+tc_on_board_TP_20=$env_tc_on_board_TP_20
+#server_ip_30=$env_tc_on_board_TP_30
 #server_ip_40=$env_tc_external_network_card_40
 #server_ip_50=env_tc_external_network_card_50
 
@@ -58,18 +58,18 @@ password=$env_tc_passwd
 
 if [ $debug = true ];then
 	#sut 本端，tc对端
-	client_ip_0=192.168.1.3
-	client_ip_10=192.168.10.3
-	client_ip_20=192.168.20.3
-	client_ip_30=192.168.30.3
+	#client_ip_0=192.168.1.3
+	#client_ip_10=192.168.10.3
+	sut_on_board_TP_20=192.168.20.3
+	#client_ip_30=192.168.30.3
 	#client_ip_50=192.168.50.11
 	
-	server_ip_0=192.168.1.6
-	server_ip_10=192.168.10.6
-	server_ip_20=192.168.20.6
-	server_ip_30=192.168.30.6
+	#server_ip_0=192.168.1.6
+	#server_ip_10=192.168.10.6
+	tc_on_board_TP_20=192.168.20.6
+	#server_ip_30=192.168.30.6
 	#server_ip_50=192.168.50.12
-	
+	testcount=3
 	#password=root
 fi
 
@@ -85,35 +85,37 @@ SSH="sshpass -p $password ssh -o StrictHostKeyChecking=no"
 function file_transport_test(){
     
     dd if=/dev/zero of=/root/testfile bs=1M count=2048
+    sync
+    sync
     md5_testfile=`md5sum /root/testfile |awk '{print $1}'`  
-    PRINT_LOG "INFO" "md5_testfile<$md5_testfile>"
-	
-    
-    $SCP /root/testfile root@${server_ip_20}:/root/testfile1
+    PRINT_LOG "INFO" "md5_testfile<$md5_testfile>"    
+    $SCP /root/testfile root@${tc_on_board_TP_20}:/root/testfile1
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port $client_ip_20 to ${server_ip_20}"
-        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_${server_ip_20}" "pass"
+        PRINT_LOG "INFO" "file copy success from port $sut_on_board_TP_20 to ${tc_on_board_TP_20}"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_${tc_on_board_TP_20}" "pass"
     else
         PRINT_LOG "FATAL" "copy file error, please check your network"
-		PRINT_LOG "FATAL" "$SCP /root/testfile root@${server_ip_20}:/root/testfile1"
-        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_${server_ip_20}" "fail"
+		PRINT_LOG "FATAL" "$SCP /root/testfile root@${tc_on_board_TP_20}:/root/testfile1"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_${tc_on_board_TP_20}" "fail"
 		return 1
     fi
+    sync
+    sync
 	
-	    $SCP root@${server_ip_20}:/root/testfile1 /root/testfile2 
+	    $SCP root@${tc_on_board_TP_20}:/root/testfile1 /root/testfile2 
     if [ $? -eq 0 ]
     then
-        PRINT_LOG "INFO" "file copy success from port ${server_ip_20} to $client_ip_20"
-        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_$client_ip_20" "pass"
+        PRINT_LOG "INFO" "file copy success from port ${tc_on_board_TP_20} to $sut_on_board_TP_20"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_$sut_on_board_TP_20" "pass"
     else
         PRINT_LOG "FATAL" "copy file error, please check your network"
-		PRINT_LOG "INFO" "$SCP root@${server_ip_20}:/root/testfile1 /root/testfile2"
-        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_$client_ip_20" "fail"
+		PRINT_LOG "FATAL" "$SCP root@${tc_on_board_TP_20}:/root/testfile1 /root/testfile2"
+        fn_writeResultFile "${RESULT_FILE}" "copy_file_to_$sut_on_board_TP_20" "fail"
 		return 1
     fi
-
-    
+    sync
+    sync
     md5_testfile2=`md5sum /root/testfile2 |awk '{print $1}'`
     PRINT_LOG "INFO" "md5_testfile2<$md5_testfile2>"    
     if [ "${md5_testfile}" = "${md5_testfile2}" ]
@@ -126,20 +128,47 @@ function file_transport_test(){
 		return 1
     fi
 }
+
 function sshpas_compile()
 {
-    cp -r ../../../../utils/tools/sshpass/ .
-    chmod 755 -R sshpass
-    cd sshpass && ./configure && sleep 5 && make && make install && cd ..
-    sshpass -V
+    sshpass -h
     if [ $? -eq 0 ];then
-        PRINT_LOG "INFO" "sshpass install pass"
+        PRINT_LOG "INFO" "sshpass is installed"
         fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "pass"
-        rm -rf sshpass
     else
-        PRINT_LOG "FATAL" "sshpass install fail"
-        fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "fail"
-        return 1
+        cp -r ../../../../utils/tools/sshpass.tar.gz .
+        for n in {1..5}
+        do
+            tar -zxvf sshpass.tar.gz
+            chmod 755 -R sshpass && cd sshpass && ./configure && sync && make && make install
+            cd ..
+            rm -rf sshpass sshpass.tar.gz
+            sshpass -h
+             if [ $? -eq 0 ];then
+                PRINT_LOG "INFO" "source compile sshpass pass"
+                #fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "pass"
+                break
+                else
+                PRINT_LOG "FATAL" "source compile sshpass fail"
+                #fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "fail"
+                continue
+            fi
+        done
+        sshpass -h
+        if [ $? -ne 0 ]
+        then
+        fn_install_pkg "sshpass" 3
+        fi
+        sshpass -h
+        if [ $? -eq 0 ]
+        then
+            PRINT_LOG "INFO" "sshpass install pass"
+            return 0
+        else
+            PRINT_LOG "FATAL" "sshpass install fail"
+            return 1
+        fi
+
     fi
 }
 
@@ -163,7 +192,7 @@ function init_env()
         fn_install_pkg $i 3
         sleep 2
         done
-       sshpas_compile || fn_install_pkg "sshpass" 3
+       sshpas_compile
    fi
     #自定义测试预置条件检查实现部分：比如工具安装，检查多机互联情况，执行用户身份 
       #需要安装工具，使用公共函数install_deps，用法：install_deps "${pkgs}"
@@ -175,7 +204,7 @@ function test_case()
 {
     #测试步骤实现部分
 
-    for ((i=1;i<=3;i++))
+    for ((i=1;i<=$testcount;i++))
     do
         file_transport_test 
     done
@@ -193,7 +222,7 @@ function clean_env()
       #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"  
     rm -f /root/testfile*
     #$SSH root@$server_ip_10 "rm -f /root/testfile*"
-	$SSH root@$server_ip_20 "rm -f /root/testfile*"
+	$SSH root@$tc_on_board_TP_20 "rm -f /root/testfile*"
 
 }
 
