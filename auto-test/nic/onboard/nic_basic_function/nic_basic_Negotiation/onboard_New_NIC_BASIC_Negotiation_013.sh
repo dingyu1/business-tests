@@ -100,8 +100,8 @@ function test_case()
 {
     SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 	SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-    eth1=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_30 | awk '{print $NF}'`
-    eth2=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_40 | awk '{print $NF}'`
+    eth1=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_20 | awk '{print $NF}'`
+    eth2=`$SSH root@$tc_on_board_fiber_10 ip a | grep $tc_on_board_TP_30 | awk '{print $NF}'`
     echo $eth1
     echo $eth2
     #恢复网卡默认设置
@@ -128,7 +128,7 @@ function test_case()
     $SSH root@$tc_on_board_fiber_10 ethtool $eth1
     $SSH root@$tc_on_board_fiber_10 ethtool $eth2
 
-    eth3=`ip a | grep $sut_on_board_TP_30 | awk '{print $NF}'`
+    eth3=`ip a | grep $sut_on_board_TP_20 | awk '{print $NF}'`
     sleep 2
     a=`ethtool $eth3`
     speed=`ethtool $eth3|grep Speed|awk '{print $2}'`
@@ -153,7 +153,7 @@ function test_case()
       fi
 
 
-    eth4=`ip a | grep $sut_on_board_TP_40 | awk '{print $NF}'`
+    eth4=`ip a | grep $sut_on_board_TP_30 | awk '{print $NF}'`
     sleep 2
     b=`ethtool $eth4`
     speed=`ethtool $eth4|grep Speed|awk '{print $2}'`
@@ -178,7 +178,7 @@ function test_case()
      fi
 
      sleep 3 
-   ping $tc_on_board_TP_30 -c 4
+   ping $tc_on_board_TP_20 -c 4
     if [ $? -eq 0 ];then
       PRINT_LOG "INFO" "$eth1 ping success"
         fn_writeResultFile "${RESULT_FILE}" "$eth1 ping" "pass"
@@ -186,7 +186,7 @@ function test_case()
         PRINT_LOG "FATAL" "$eth1 ping fail"
         fn_writeResultFile "${RESULT_FILE}" "$eth1 ping" "fail"
     fi
-   ping $tc_on_board_TP_40 -c 4
+   ping $tc_on_board_TP_30 -c 4
     if [ $? -eq 0 ];then
        PRINT_LOG "INFO" "$eth2 ping success"
         fn_writeResultFile "${RESULT_FILE}" "$eth2 ping" "pass"
@@ -229,5 +229,4 @@ ret=$?
 #LAVA平台上报结果接口，勿修改
 lava-test-case "$test_name" --result ${test_result}
 exit ${ret}
-
 
