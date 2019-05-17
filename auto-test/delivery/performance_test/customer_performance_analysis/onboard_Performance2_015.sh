@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #*****************************************************************************************
-# *用例名称：onboard_Performance2_011
-# *用例功能：板载enp125s0f3电口大包（1000M）
+# *用例名称：onboard_Performance2_015
+# *用例功能：板载enp125s0f3电口大包（100M）
 # *作者：wwx573515
-# *完成时间：2019-05-6
+# *完成时间：2019-05-13
 # *前置条件：
 #   1、两台物理机host1和host2，分别用作TAS端和SUT端
 #   2、两台物理机板载enp125s0f3电口连接同个交换机
@@ -40,8 +40,9 @@ RESULT_FILE=${TMPDIR}/${test_name}.result
 #var_name1="xxxx"
 #var_name2="xxxx"
 test_result="pass"
+
 SSH="timeout 1000 sshpass -p root ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 
-SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 
 
 #预置条件
 function init_env()
@@ -61,19 +62,21 @@ function init_env()
     network=`ip route|grep "$env_sut_on_board_TP_30"|awk '{print $3}'`  
      
     ip link set $network mtu 9000
+    ethtool -s $network speed 100 duplex full autoneg off
     systemctl disable firewalld.service
     systemctl stop firewalld.service
 
-    wget ${ci_http_addr}/test_dependents/netperf.tar.gz
-    tar -zxvf netperf.tar.gz &&  cd netperf && ./configure -build=alpha
+    wget ${ci_http_addr}/test_dependents/netperf-2.5.0.tar.gz
+    tar -zxvf netperf-2.5.0.tar.gz &&  cd netperf-netperf-2.5.0 && ./configure -build=alpha
     make && make install && cd -
 
     $SSH root@$ip_board "yum install -y gcc make tar wget sshpass net-tools"
     $SSH root@$ip_board "systemctl disable firewalld.service && systemctl stop firewalld.service"
     $SSH root@$ip_board "ip link set $network mtu 9000"
-    $SSH root@$ip_board "wget ${ci_http_addr}/test_dependents/netperf.tar.gz"
-    $SSH root@$ip_board "tar -zxvf netperf.tar.gz "
-    $SSH root@$ip_board "cd netperf && ./configure -build=alpha && make && make install && cd - "
+    $SSH root@$ip_board "ethtool -s $network speed 100 duplex full autoneg off"  
+    $SSH root@$ip_board "wget ${ci_http_addr}/test_dependents/netperf-2.5.0.tar.gz"
+    $SSH root@$ip_board "tar -zxvf netperf-2.5.0.tar.gz "
+    $SSH root@$ip_board "cd netperf-netperf-2.5.0 && ./configure -build=alpha && make && make install && cd - "
     $SSH root@$ip_board "netserver &"
 
 }
@@ -89,9 +92,9 @@ function test_case()
    lenth="10240 60140"
    for i in $lenth
    do 
-         netperf -H $ip -t UDP_STREAM –l 30 -- -m $i -M $i 2>&1 | tee result.txt
+         netperf -H $ip -t UDP_STREAM -l 30 -- -m $i -M $i 2>&1 | tee result.txt
          Throughput=`tail -n 3 result.txt | awk '{print $6}'|head -1` 
-         t=980
+         t=98
          max=`echo "$Throughput > $t"|bc`
          if [ $max -eq 1 ];then
             PRINT_LOG "INFO" "${i}_speed_check_ok"
@@ -116,7 +119,7 @@ function test_case()
             PRINT_LOG "INFO" "Tx_dropped_check_ok"
             fn_writeResultFile "${RESULT_FILE}" "Tx_dropped_check" "pass"
          else
-            PRINT_LOG "FATAL" "have-dropped"
+            PRINT_LOG "FATAL" "Tx_dropped_check_fail"
             fn_writeResultFile "${RESULT_FILE}" "Tx_dropped_check" "fail"
          fi
    check_result ${RESULT_FILE}
@@ -125,13 +128,16 @@ function test_case()
 #恢复环境
 function clean_env()
 {
+    ethtool -s $network speed 1000 duplex full autoneg on    
+    ip link set $network mtu 1500 
+    $SSH root@$ip_board "ethtool -s $network speed 1000 duplex full autoneg on"
     $SSH root@$ip_board "ip link set $network mtu 1500"
-    $SSH root@$ip_board "rm -rf netperf.tar.gz"
+    $SSH root@$ip_board "rm -rf netperf-2.5.0.tar.gz"
     $SSH root@$ip_board ps -ef | grep -i netserver |awk '{print $2}'|awk 'NR == 1'|tee pro_id.txt
     pro_id=`cat pro_id.txt`
     $SSH root@$ip_board "kill -9 $pro_id"
-    rm -rf csh.txt csq.txt result.txt netperf.tar.gzs pro_id.txt
-    ip link set $network mtu 1500     
+    rm -rf csh.txt csq.txt result.txt netperf-2.5.0.tar.gzs pro_id.txt
+    ip link set $network mtu 1500   
 }
 
 function main()
