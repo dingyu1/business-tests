@@ -145,11 +145,11 @@ function sshpas_compile()
             rm -rf sshpass sshpass.tar.gz
             sshpass -h
              if [ $? -eq 0 ];then
-                #PRINT_LOG "INFO" "sshpass install pass"
+                PRINT_LOG "INFO" "source compile sshpass pass"
                 #fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "pass"
                 break
                 else
-                #PRINT_LOG "FATAL" "sshpass install fail"
+                PRINT_LOG "FATAL" "source compile sshpass fail"
                 #fn_writeResultFile "${RESULT_FILE}" "sshpass_install" "fail"
                 continue
             fi
