@@ -1,23 +1,23 @@
 
 metadata:
-    name: onboard_Performance2_010
+    name: onboard_Performance2_012
     format: "Lava-Test-Shell Test Definition 1.0"
     description: "Align the stream performance benchmark parameters"
     maintainer:
         - ding_yu1@hoperun.com
     scope:
-        - performance
+        - delivery 
     os:
         - redhat
     devices:
         - OS_d06_ssh_nic 
-    level: 5
+    level: 1
     totalcase: 
         redhat: 1
 
 run:
     steps:
-        - "cd auto-test/delivery/performance_test/customer_performance_analysis; ./onboard_Performance2_010.sh; cd -"
+        - "cd auto-test/delivery/performance_test/customer_performance_analysis; ./onboard_Performance2_012.sh; cd -"
 
 parse:
     pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"

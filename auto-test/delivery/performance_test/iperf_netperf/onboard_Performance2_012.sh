@@ -8,7 +8,9 @@
 # *前置条件：
 #   1、两台物理机host1和host2，分别用作TAS端和SUT端
 #   2、两台物理机板载enp125s0f2电口连接同个交换机
-#   3、修改两台物理机的MTU为9000: ifconfig ethx mtu 1500
+#   3、修改两台物理机的MTU为1500: ifconfig ethx mtu 1500
+#   4、修改两台物理机的网口速率为100M:
+#      ethtool -s enp125s0f2  speed 100 duplex full autoneg off
 # *测试步骤：
 #   1、 Server端：netserver
 #       SUT端：netperf -H <Server IP> -t UDP_STREAM –l 30 -- -m pkt_length –M pkt_length
