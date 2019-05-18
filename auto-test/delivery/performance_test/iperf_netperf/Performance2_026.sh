@@ -169,6 +169,7 @@ EOF
 	local_ip=`ip address show $net |  grep -w inet | awk -F'[ /]+' '{print $3}'`
 	remote_ip=`echo $IP_table | sed 's/ /\n/g' | grep -w ${local_ip%.*} | grep -v $local_ip | awk -F = '{print $2}'`
 	ping $remote_ip -c 5
+	[ $? -ne 0 ] && ip a
 	sleep 5
 	echo ---------
 	echo "local ip" $local_ip
