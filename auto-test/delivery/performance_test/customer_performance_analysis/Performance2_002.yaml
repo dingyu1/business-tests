@@ -6,7 +6,7 @@ metadata:
     maintainer:
         - ding_yu1@hoperun.com
     scope:
-        - performance
+        - delivery
     os:
         - centos
         - ubuntu

@@ -1,0 +1,36 @@
+
+
+metadata:
+    name: Performance2_003
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Aligned character benchmark: 400. Perlbench 462. Libquantum"
+    maintainer:
+        - ding_yu1@hoperun.com
+    scope:
+        - delivery
+    os:
+        - centos  
+        - debian
+        - suse
+        - redhat
+        - ubuntu
+    devices:
+        - d05
+    level: 1
+    totalcase:
+        centos: 1
+        ubuntu: 1
+        debian: 1
+        suse: 1
+        redhat: 1
+run:
+    steps:
+        - "cd auto-test/delivery/performance_test/customer_performance_analysis; ./Performance2_003.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
+
+
+
