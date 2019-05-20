@@ -4,19 +4,24 @@ metadata:
     description: "server ping sut no loss package"
     maintainer:
         - lwx588815
-    os:
-        - centos
-        - ubuntu
-        - redhat
     scope:
         - nic
+    os:
+        - centos
+        - debian
+        - redhat
+        - suse
+        - ubuntu
     devices:
         - OS_d06_ssh_nic
     level: 1
     totalcase:
-            centos: 1
-            redhat: 1
-            ubuntu: 1
+        centos: 1
+        debian: 1
+        redhat: 1
+        suse: 1
+        ubuntu: 1
+
 run:
     steps:
         - "cd auto-test/nic/onboard/nic_performance; ./onboard_NIC_PERFORMANCE_001.sh; cd -"

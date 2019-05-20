@@ -109,20 +109,19 @@ function ipv6_test(){
 		fn_writeResultFile "${RESULT_FILE}" "${tc_ip}_connect" "pass"
 		#ip a del 2001:da8:2004:1000:202:116:160:41/64 dev $sut_name
         ip a add 2001:da8:2004:1000:202:116:160:41/64 dev $sut_name
-
 		sleep 2
 		
 		tc_name=`${SSH} root@${tc_ip} ip a | grep $tc_ip | awk '{print $NF}'`
 		#$SSH root@${tc_ip} ip a del 2001:da8:2004:1000:202:116:160:42/64 dev $tc_name
 		$SSH root@${tc_ip} ip a add 2001:da8:2004:1000:202:116:160:42/64 dev $tc_name
-		
 		sleep 2
 		
 		ping6 2001:da8:2004:1000:202:116:160:42 -c 5
-        if [ $? -ne 0 ];then
-           fn_writeResultFile "${RESULT_FILE}" "${sut_name}_ipv6_connect" "fail"
-        else
+        if [ $? -eq 0 ];then
            fn_writeResultFile "${RESULT_FILE}" "${sut_name}_ipv6_connect" "pass"
+        else
+		    fn_writeResultFile "${RESULT_FILE}" "${sut_name}_ipv6_connect" "fail"
+		   return 1
         fi
 		sleep 5
 		
@@ -133,6 +132,7 @@ function ipv6_test(){
 	else
 		PRINT_LOG "FATAL" "$tc_ip connect is not normal."
 		fn_writeResultFile "${RESULT_FILE}" "${tc_ip}_connect" "fail"
+		return 1
 	fi
 }
 
@@ -149,8 +149,8 @@ function init_env()
         PRINT_LOG "WARN" " You must be root user "
         return 1
     fi
-    fn_install_pkg "sshpass" 2
-	fn_install_pkg "ethtool" 2
+	ethtool --version || fn_install_pkg "ethtool" 10
+	sshpass -h || fn_install_pkg "sshpass" 10
 	distinguish_card
 	#board_card=(enp125s0f2)
 }
