@@ -1,0 +1,31 @@
+metadata:
+    name: onboard_Function_007
+    format: "Lava-Test-Shell Test Definition 1.0"
+    description: "Cp file via firbe nic"
+    maintainer:
+        - lirenxing2@hisilicon.com
+    scope:
+        - delivery
+    os:
+        - centos 
+        - debian 
+        - redhat 
+        - suse 
+        - ubuntu  
+    devices:
+        - OS_d06_ssh_nic
+    level: 1
+    totalcase:
+        centos: 1
+        debian: 1
+        redhat: 1
+        suse: 1
+        ubuntu: 1   
+run:
+    steps:
+        - "cd auto-test/delivery/network/basic_function; ./onboard_Function_007.sh; cd -"
+parse:
+   pattern: "^(?!.+ED)(?P<test_case_id>\\w+)\\s+(?P<result>\\w+)\\s+\\d$"
+   fixupdict:
+       FAIL: fail
+       PASS: pass
