@@ -53,10 +53,10 @@ function init_env()
 #测试执行
 function test_case()
 {
+	port_total=0
     for i in `ip a|grep -i 'state'|awk -F: '{print $2}'`
     do
         echo $i
-		port_total=0
 		lspci | grep `ethtool -i $i| grep bus-info | awk '{print $2}'|awk -F":" '{print $2":"$3}'` | grep -i 1822
 		if [ $? -eq 0 ]
 		then
@@ -76,7 +76,7 @@ function test_case()
 		fi
 	done
 	
-	if [ $port_total -eq 4 ]
+	if [ "$port_total" -eq 4 ]
 	then
 		echo "1822 has 4 fibre  interface "
 		PRINT_LOG "INFO" "has_4_interface" 
