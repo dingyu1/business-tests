@@ -126,8 +126,8 @@ netserver
 
 #在对端向本端发包
 path=`pwd`
-$SCP $path/install_netperf.sh  root@$env_tc_on_board_fiber_10:/root/
-$SSH root@$env_tc_on_board_fiber_10 "bash install_netperf.sh; netperf -H $env_sut_on_board_fiber_10 -t UDP_STREAM -l 30 -- -m 10240; exit"
+$SCP $path/install_netperf.sh  root@$tc_ip_10:/root/
+$SSH root@$tc_ip_10 "bash install_netperf.sh; netperf -H $sut_ip_10 -t UDP_STREAM -l 30 -- -m 10240; exit"
 
 
 #查询网卡在客户端发包后的收包信息
@@ -159,7 +159,10 @@ function clean_env()
 
 #清除临时文件
 FUNC_CLEAN_TMP_FILE
-  
+
+pkill netserver
+$SSH root@$tc_ip_10 "pkill netserver; exit"
+
 
 }
 

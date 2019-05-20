@@ -74,8 +74,8 @@ SCP="timeout 1000 sshpass -p root scp -o StrictHostKeyChecking=no -o UserKnownHo
 function test_case()
 {
 #获取本端和对端网卡ip
-sut_ip_172=$env_sut_on_board_fiber_0
-tc_ip_172=$env_tc_on_board_fiber_0
+sut_ip_172=$env_sut_external_network_card_50
+tc_ip_172=$env_tc_external_network_card_50
 	
 
 #获取本端ip对应网卡名称
@@ -159,8 +159,9 @@ function clean_env()
 
 #清除临时文件
 FUNC_CLEAN_TMP_FILE
-  
 
+pkill netserver
+$SSH root@$tc_ip_172 "pkill netserver; exit"
 }
 
 
