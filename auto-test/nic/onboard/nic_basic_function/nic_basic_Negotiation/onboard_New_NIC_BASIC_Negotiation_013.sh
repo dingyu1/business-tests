@@ -105,9 +105,9 @@ function test_case()
     echo $eth1
     echo $eth2
     #恢复网卡默认设置
-    ethtool -s $eth1 autoneg on
-    ethtool -s $eth2 autoneg on
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 speed 100 duplex full autoneg on"
+   $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 autoneg on
+   $SSH root@$tc_on_board_fiber_10 ethtool -s $eth2 autoneg on
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 speed 100 duplex full autoneg on
     if [ $? -eq 0 ];then
         PRINT_LOG "INFO" "$eth1 set success"
         fn_writeResultFile "${RESULT_FILE}" "$eth1 set autoneg" "pass"
@@ -209,8 +209,8 @@ function clean_env()
     #自定义环境恢复实现部分,工具安装不建议恢复
      #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
      #恢复对端环境
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 autoneg on"
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth2 autoneg on"
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 autoneg on
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth2 autoneg on
     ethtool -s $eth3 autoneg on
     ethtool -s $eth4 autoneg on
 }
