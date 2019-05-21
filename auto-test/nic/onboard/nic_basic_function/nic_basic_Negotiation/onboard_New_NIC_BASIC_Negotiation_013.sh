@@ -105,9 +105,9 @@ function test_case()
     echo $eth1
     echo $eth2
     #恢复网卡默认设置
-    ethtool -s $eth1 autoneg on
-    ethtool -s $eth2 autoneg on
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 speed 100 duplex full autoneg on"
+   $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 autoneg on
+   $SSH root@$tc_on_board_fiber_10 ethtool -s $eth2 autoneg on
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 speed 100 duplex full autoneg on
     if [ $? -eq 0 ];then
         PRINT_LOG "INFO" "$eth1 set success"
         fn_writeResultFile "${RESULT_FILE}" "$eth1 set autoneg" "pass"
@@ -124,12 +124,12 @@ function test_case()
         PRINT_LOG "FATAL" "$eth2 set fail."
         fn_writeResultFile "${RESULT_FILE}" "$eth2 set autoneg" "fail"
     fi
-    sleep 3
+    sleep 5
     $SSH root@$tc_on_board_fiber_10 ethtool $eth1
     $SSH root@$tc_on_board_fiber_10 ethtool $eth2
 
     eth3=`ip a | grep $sut_on_board_TP_20 | awk '{print $NF}'`
-    sleep 2
+    sleep 5
     a=`ethtool $eth3`
     speed=`ethtool $eth3|grep Speed|awk '{print $2}'`
     Duplex=`ethtool $eth3|grep Duplex|awk '{print $2}'`
@@ -154,7 +154,7 @@ function test_case()
 
 
     eth4=`ip a | grep $sut_on_board_TP_30 | awk '{print $NF}'`
-    sleep 2
+    sleep 5
     b=`ethtool $eth4`
     speed=`ethtool $eth4|grep Speed|awk '{print $2}'`
     Duplex=`ethtool $eth4|grep Duplex|awk '{print $2}'`
@@ -177,7 +177,7 @@ function test_case()
          fn_writeResultFile "${RESULT_FILE}" "$eth4 Auto_negotiation" "fail"
      fi
 
-     sleep 3 
+     sleep 5 
    ping $tc_on_board_TP_20 -c 4
     if [ $? -eq 0 ];then
       PRINT_LOG "INFO" "$eth1 ping success"
@@ -209,8 +209,10 @@ function clean_env()
     #自定义环境恢复实现部分,工具安装不建议恢复
      #需要日志打印，使用公共函数PRINT_LOG，用法：PRINT_LOG "INFO|WARN|FATAL" "xxx"
      #恢复对端环境
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth1 autoneg on"
-    $SSH root@$tc_on_board_fiber_10 "ethtool -s $eth2 autoneg on"
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth1 autoneg on
+    $SSH root@$tc_on_board_fiber_10 ethtool -s $eth2 autoneg on
+    ethtool -s $eth3 autoneg on
+    ethtool -s $eth4 autoneg on
 }
 
 function main()

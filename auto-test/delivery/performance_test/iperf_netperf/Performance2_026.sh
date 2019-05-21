@@ -169,6 +169,7 @@ EOF
 	local_ip=`ip address show $net |  grep -w inet | awk -F'[ /]+' '{print $3}'`
 	remote_ip=`echo $IP_table | sed 's/ /\n/g' | grep -w ${local_ip%.*} | grep -v $local_ip | awk -F = '{print $2}'`
 	ping $remote_ip -c 5
+	[ $? -ne 0 ] && ip a
 	sleep 5
 	echo ---------
 	echo "local ip" $local_ip
@@ -233,11 +234,17 @@ function init_env()
 	$SCP $netperf root@$remote_ip:/root/
 	$SSH root@$remote_ip "ls /root/${netperf##*\/}"
 	if [ $? -eq 0 ];then
+		PRINT_LOG "INFO" "transport netperf.tar.gz success"
+		fn_writeResultFile "${RESULT_FILE}" "transport_netperf_tar" "pass"
 		$SCP $netperf_sh root@$remote_ip:/root/
 		$SSH root@$remote_ip "ls /root/$netperf_sh"
 		if [ $? -eq 0 ];then
+			PRINT_LOG "INFO" "transport netperf.sh success"
+			fn_writeResultFile "${RESULT_FILE}" "transport_netperf_sh" "pass"
 			$SSH root@$remote_ip "bash /root/$netperf_sh" | grep pass 
 			if [ $? -eq 0 ];then
+				PRINT_LOG "INFO" "tc prot netserver insatll pass"
+				fn_writeResultFile "${RESULT_FILE}" "tc_netperf_install" "pass"
 				$SSH root@$remote_ip "pkill netserver; netserver"
 				$SSH  root@$remote_ip  ps -ef | grep -v "grep --color=auto" | grep netserver
 				if [ $? -eq 0 ];then
@@ -247,20 +254,14 @@ function init_env()
 					PRINT_LOG "FATAL" "tc port netserver start fail"
 					fn_writeResultFile "${RESULT_FILE}" "tc_netserver_start" "pass"
 				fi
-				PRINT_LOG "INFO" "tc prot netserver insatll pass"
-				fn_writeResultFile "${RESULT_FILE}" "tc_netperf_install" "pass"
 			else
 				PRINT_LOG "INFO" "tc prot netserver insatll pass"
 				fn_writeResultFile "${RESULT_FILE}" "tc_netperf_install" "pass"
 			fi
-			PRINT_LOG "INFO" "transport netperf.sh success"
-			fn_writeResultFile "${RESULT_FILE}" "transport_netperf_sh" "pass"
 		else
 			PRINT_LOG "INFO" "transport netperf.sh fail"
 			fn_writeResultFile "${RESULT_FILE}" "transport_netperf_sh" "pass"
 		fi
-		PRINT_LOG "INFO" "transport netperf.tar.gz success"
-		fn_writeResultFile "${RESULT_FILE}" "transport_netperf_tar" "pass"
 	else
 		PRINT_LOG "INFO" "transport netperf.tar.gz success"
 		fn_writeResultFile "${RESULT_FILE}" "transport_netperf_tar" "pass"
